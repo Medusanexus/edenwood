@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Edenwood — Profil</title>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      background-color: #0e1a14;
+      color: #e6f2ea;
+      font-family: Georgia, serif;
+      padding: 40px;
+    }
+    h1 { color: #9fe0b5; }
+    button {
+      padding: 8px;
+      font-family: inherit;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Bienvenue dans Edenwood</h1>
+  <p id="userEmail"></p>
+
+  <button onclick="logout()">Se déconnecter</button>
+
+  <script>
+    const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
+
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function loadUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        document.getElementById("userEmail").textContent =
+          "Âme liée : " + user.email;
+      }
+    }
+
+    async function logout() {
+      await supabase.auth.signOut();
+      window.location.href = "login.html";
+    }
+
+    loadUser();
+  </script>
+</body>
+</html>
