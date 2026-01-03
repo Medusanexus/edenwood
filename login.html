@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Edenwood — Connexion</title>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      background-color: #0e1a14;
+      color: #e6f2ea;
+      font-family: Georgia, serif;
+      padding: 40px;
+    }
+    h1 { color: #9fe0b5; }
+    input, button {
+      display: block;
+      margin: 10px 0;
+      padding: 8px;
+      font-family: inherit;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Edenwood</h1>
+  <p>Entre dans la clairière.</p>
+
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Mot de passe">
+
+  <button onclick="signUp()">Créer un compte</button>
+  <button onclick="signIn()">Se connecter</button>
+
+  <p id="message"></p>
+
+  <script>
+    const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
+
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function signUp() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password
+      });
+
+      document.getElementById("message").textContent =
+        error ? error.message : "Compte créé 🌱 Vérifie ton email.";
+    }
+
+    async function signIn() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        document.getElementById("message").textContent = error.message;
+      } else {
+        window.location.href = "profile.html";
+      }
+    }
+  </script>
+</body>
+</html>
