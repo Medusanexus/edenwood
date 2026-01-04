@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Edenwood — Entrée</title>
 
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Police fantasy élégante (titre uniquement) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -42,39 +48,54 @@
       place-items: center;
     }
 
-    /* conteneur centré */
     .wrap {
-      width: min(520px, 92vw);
+      width: min(560px, 92vw);
       text-align: center;
-      animation: fadeIn 600ms ease-out both;
+      animation: fadeIn 650ms ease-out both;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Titre Edenwood */
+    /* TITRE - plus grand + typographie "fantasy" */
     h1 {
       margin: 0 0 10px 0;
-      font-size: clamp(2.4rem, 5vw, 3.2rem);
-      letter-spacing: 1px;
-      color: var(--accent);
+      font-family: "Cinzel", serif;
+      font-size: clamp(3.4rem, 6.5vw, 4.6rem);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #b8f1cf;
 
-      /* effet "lumière douce" */
       text-shadow:
-        0 0 10px rgba(159,224,181,0.20),
-        0 0 24px rgba(106,203,149,0.15),
-        0 2px 0 rgba(0,0,0,0.35);
+        0 0 10px rgba(184,241,207,0.35),
+        0 0 28px rgba(106,203,149,0.22),
+        0 4px 14px rgba(0,0,0,0.70);
+    }
+
+    /* Soulignement mystique discret */
+    h1::after {
+      content: "";
+      display: block;
+      width: 150px;
+      height: 1px;
+      margin: 14px auto 0;
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(184,241,207,0.65),
+        transparent
+      );
     }
 
     .subtitle {
-      margin: 0 0 18px 0;
+      margin: 10px 0 18px 0;
       opacity: 0.92;
       font-size: 1.05rem;
     }
 
-    /* carte / panel */
     .panel {
       margin: 0 auto;
       padding: 20px 20px 16px;
@@ -83,7 +104,6 @@
       background: rgba(14, 26, 20, 0.46);
       border: 1px solid rgba(255, 255, 255, 0.12);
 
-      /* halo + relief */
       box-shadow:
         0 18px 60px rgba(0,0,0,0.45),
         0 0 0 1px rgba(159,224,181,0.06) inset;
@@ -95,13 +115,13 @@
       box-shadow:
         0 18px 70px rgba(0,0,0,0.50),
         0 0 0 1px rgba(159,224,181,0.10) inset,
-        0 0 30px rgba(106,203,149,0.08);
+        0 0 34px rgba(106,203,149,0.08);
       transition: box-shadow 220ms ease;
     }
 
     input, button {
       display: block;
-      width: 320px;
+      width: 340px;
       max-width: 78vw;
       margin: 10px auto;
       padding: 12px 12px;
@@ -120,7 +140,7 @@
 
     input:focus {
       box-shadow:
-        0 0 0 2px rgba(159,224,181,0.35),
+        0 0 0 2px rgba(184,241,207,0.35),
         0 0 18px rgba(106,203,149,0.12);
     }
 
@@ -138,20 +158,21 @@
 
     #status {
       margin: 10px auto 0;
-      width: 320px;
+      width: 340px;
       max-width: 78vw;
       white-space: pre-wrap;
       opacity: 0.92;
       font-size: 0.95rem;
-      min-height: 1.1em; /* évite le saut de layout */
+      min-height: 1.1em;
     }
 
     .error { color: #ff6b6b; }
 
-    /* mobile : padding un peu réduit */
     @media (max-width: 480px) {
       .overlay { padding: 22px; }
       .panel { padding: 16px 16px 12px; }
+      h1 { letter-spacing: 0.08em; }
+      h1::after { width: 120px; }
     }
   </style>
 </head>
