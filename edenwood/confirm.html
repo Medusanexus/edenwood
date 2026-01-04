@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edenwood — Confirmation</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="overlay">
+    <div class="wrap">
+      <h1>Edenwood</h1>
+      <p class="subtitle">Validation en cours…</p>
+
+      <div class="panel">
+        <div class="info">
+          <strong>Patiente une seconde.</strong><br/>
+          <span style="opacity:.85">On te ramène dans la clairière…</span>
+        </div>
+
+        <div id="status" style="min-height:1.2em;"></div>
+
+        <a class="btn secondary" href="login.html">Retour à la connexion</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Objectif : récupérer confirmation_url envoyé par Supabase,
+    // puis FORCER redirect_to vers /edenwood/profile.html (ou login.html si tu préfères).
+    const statusEl = document.getElementById("status");
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("confirmation_url");
+
+    if (!raw) {
+      statusEl.textContent = "Lien invalide : confirmation_url manquant.";
+      statusEl.className = "error";
+    } else {
+      try {
+        const u = new URL(raw);
+
+        // ✅ Forcer la redirection finale vers ton vrai site
+        u.searchParams.set("redirect_to", "https://medusanexus.github.io/edenwood/profile.html");
+
+        // Redirection vers l'URL de confirmation Supabase (avec redirect_to corrigé)
+        window.location.href = u.toString();
+      } catch (e) {
+        statusEl.textContent = "Lien invalide : impossible de lire l’URL.";
+        statusEl.className = "error";
+      }
+    }
+  </script>
+</body>
+</html>
