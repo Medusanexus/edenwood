@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Edenwood — Test clic</title>
+  <title>Edenwood — Connexion</title>
+
+  <!-- Supabase v2 via jsDelivr (moins souvent bloqué) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     body {
@@ -12,9 +15,8 @@
       font-family: Georgia, serif;
       padding: 40px;
     }
-
-    h1 { color: #9fe0b5; font-size: 2.2rem; }
-    p { opacity: .9; }
+    h1 { color: #9fe0b5; font-size: 2.2rem; margin-bottom: .5rem; }
+    p { opacity: .9; margin-bottom: 1rem; }
 
     input, button {
       display: block;
@@ -25,16 +27,13 @@
       border: none;
       font-size: 1rem;
     }
-
     input { width: 280px; }
-
     button {
       background-color: #2a6b52;
       color: white;
       cursor: pointer;
       width: 220px;
     }
-
     button:hover { background-color: #348c6a; }
 
     #status {
@@ -44,7 +43,11 @@
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.14);
       font-size: 0.95rem;
+      white-space: pre-wrap;
     }
+    .ok { color: #5bf2b0; }
+    .err { color: #ff6b6b; }
+    .muted { opacity: .9; }
   </style>
 </head>
 
@@ -52,33 +55,118 @@
 
   <h1>Edenwood</h1>
   <p>Entre dans la clairière.</p>
+  <p style="font-size:12px; opacity:.7;">VERSION SUPABASE DEBUG — 2026-01-04 C</p>
 
-  <p style="font-size:12px; opacity:.7;">VERSION TEST CLIC — 2026-01-04 B</p>
+  <input id="email" type="email" placeholder="Email" />
+  <input id="password" type="password" placeholder="Mot de passe" />
 
-  <input type="email" placeholder="Email" />
-  <input type="password" placeholder="Mot de passe" />
+  <button id="btnSignup" type="button">Créer un compte</button>
+  <button id="btnLogin" type="button">Se connecter</button>
 
-  <button id="btnTest" type="button">Créer un compte</button>
-
-  <div id="status">Status : en attente…</div>
+  <div id="status" class="muted">Status : en attente…</div>
 
   <script>
-    const statusEl = document.getElementById("status");
-    const btn = document.getElementById("btnTest");
+    const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
 
-    function setStatus(text) {
+    const statusEl = document.getElementById("status");
+    const emailEl  = document.getElementById("email");
+    const passEl   = document.getElementById("password");
+    const btnSignup = document.getElementById("btnSignup");
+    const btnLogin  = document.getElementById("btnLogin");
+
+    function setStatus(text, cls="muted") {
+      statusEl.className = cls;
       statusEl.textContent = text;
       console.log(text);
     }
 
-    // 🔹 preuve que le JS s’exécute AU CHARGEMENT
-    setStatus("✅ JS chargé (au chargement)");
-
-    // 🔹 preuve que le clic est détecté
-    btn.addEventListener("click", () => {
-      setStatus("✅ CLIC détecté (bouton fonctionnel)");
+    // Affiche erreurs JS directement
+    window.addEventListener("error", (e) => {
+      setStatus("Erreur JS :\n" + (e?.message || e), "err");
     });
-  </script>
+    window.addEventListener("unhandledrejection", (e) => {
+      setStatus("Erreur async :\n" + (e?.reason?.message || e?.reason || e), "err");
+    });
 
+    // 1) preuve JS ok
+    setStatus("✅ JS chargé (au chargement)", "ok");
+
+    // 2) Vérifie la lib Supabase
+    if (!window.supabase || !window.supabase.createClient) {
+      setStatus(
+        "❌ Supabase JS n'a pas chargé.\n" +
+        "Probable blocage (AdBlock / réseau).\n\n" +
+        "Astuce : autoriser cdn.jsdelivr.net sur ce site, ou on héberge supabase.js dans le repo.",
+        "err"
+      );
+      // on stop ici
+      throw new Error("Supabase JS absent");
+    }
+
+    setStatus("✅ Supabase JS chargé", "ok");
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Helpers
+    function getCreds() {
+      return {
+        email: emailEl.value.trim(),
+        password: passEl.value
+      };
+    }
+
+    btnSignup.addEventListener("click", async () => {
+      setStatus("🟡 Clic signup détecté…", "muted");
+
+      const { email, password } = getCreds();
+      if (!email || !password) return setStatus("❌ Remplis email + mot de passe.", "err");
+      if (password.length < 6) return setStatus("❌ Mot de passe : minimum 6 caractères.", "err");
+
+      setStatus("🟡 Création du compte…", "muted");
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: new URL("profile.html", window.location.href).toString(),
+        }
+      });
+
+      if (error) return setStatus("❌ Erreur signup : " + error.message, "err");
+
+      if (data?.session) {
+        setStatus("✅ Compte créé & connecté. Redirection…", "ok");
+        window.location.href = "profile.html";
+      } else {
+        setStatus("✅ Compte créé. Vérifie tes emails (confirmation).", "ok");
+      }
+    });
+
+    btnLogin.addEventListener("click", async () => {
+      setStatus("🟡 Clic login détecté…", "muted");
+
+      const { email, password } = getCreds();
+      if (!email || !password) return setStatus("❌ Remplis email + mot de passe.", "err");
+
+      setStatus("🟡 Connexion…", "muted");
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) return setStatus("❌ Erreur login : " + error.message, "err");
+
+      setStatus("✅ Connecté. Redirection…", "ok");
+      window.location.href = "profile.html";
+    });
+
+    // Auto redirect si déjà connecté
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session) {
+        setStatus("✅ Session déjà active. Redirection…", "ok");
+        window.location.href = "profile.html";
+      }
+    })();
+  </script>
 </body>
 </html>
