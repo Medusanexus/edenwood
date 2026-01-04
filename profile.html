@@ -19,6 +19,11 @@
       <p class="subtitle">Bienvenue, voyageur·se.</p>
 
       <div class="panel">
+        <!-- Identité dynamique -->
+        <div class="info"><strong>Pseudo :</strong> <span id="profilePseudo">…</span></div>
+        <div class="info"><strong>Email :</strong> <span id="profileEmail">…</span></div>
+
+        <!-- Lore (placeholder pour l’instant) -->
         <div class="info"><strong>Rang :</strong> Éveillé</div>
         <div class="info"><strong>Affinité :</strong> Forêt ancienne</div>
         <div class="info"><strong>Carte liée :</strong> À venir…</div>
@@ -32,7 +37,6 @@
           <a href="login.html" data-auth="out">Connexion</a>
           <a href="#" id="linkLogout" data-auth="in">Déconnexion</a>
         </nav>
-
       </div>
     </div>
   </div>
@@ -46,9 +50,17 @@
 
     // Garde-fou : pas connecté => login
     const { data } = await supabase.auth.getSession();
-    if (!data?.session) window.location.href = "login.html";
+    const session = data?.session;
+    if (!session) window.location.href = "login.html";
 
-    // Déconnexion (bouton principal)
+    const user = session.user;
+    const pseudo = (user.user_metadata && user.user_metadata.display_name) ? user.user_metadata.display_name : "—";
+    const email = user.email ?? "—";
+
+    document.getElementById("profilePseudo").textContent = pseudo;
+    document.getElementById("profileEmail").textContent = email;
+
+    // Déconnexion via bouton principal (Changer de voyageur)
     document.getElementById("btnLogout").addEventListener("click", async (e) => {
       e.preventDefault();
       await supabase.auth.signOut();
@@ -56,6 +68,7 @@
     });
   </script>
 
+  <!-- Nav intelligente (connecté / pas connecté + logout) -->
   <script type="module" src="assets/nav.js"></script>
 </body>
 </html>
