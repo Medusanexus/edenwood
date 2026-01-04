@@ -25,7 +25,7 @@
 
       <div class="panel">
         <input id="email" type="email" placeholder="Email" autocomplete="email" />
-        <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password" />
+        <input id="password" type="password" placeholder="Mot de passe (6+)" autocomplete="current-password" />
 
         <button id="btnSignup" type="button">Créer un compte</button>
         <button id="btnLogin" type="button">Se connecter</button>
@@ -35,66 +35,117 @@
         <a class="btn secondary" href="index.html">Retour</a>
       </div>
     </div>
+  </div>
 
-    <script>
-      // ⚠️ Tes clés Supabase (celles que tu avais déjà)
-      const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
-      const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
+  <script>
+    // ⚠️ Tes clés Supabase (les mêmes que tu avais)
+    const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
 
-      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const emailEl  = document.getElementById("email");
+    const passEl   = document.getElementById("password");
+    const statusEl = document.getElementById("status");
+    const btnSignup = document.getElementById("btnSignup");
+    const btnLogin  = document.getElementById("btnLogin");
 
-      const emailEl = document.getElementById("email");
-      const passEl  = document.getElementById("password");
-      const statusEl = document.getElementById("status");
+    function setStatus(text, isError = false) {
+      statusEl.textContent = text;
+      statusEl.className = isError ? "error" : "";
+      console[isError ? "error" : "log"](text);
+    }
 
-      function setStatus(text, isError = false) {
-        statusEl.textContent = text;
-        statusEl.className = isError ? "error" : "";
-      }
+    function setLoading(isLoading) {
+      btnSignup.disabled = isLoading;
+      btnLogin.disabled = isLoading;
+      btnSignup.textContent = isLoading ? "..." : "Créer un compte";
+      btnLogin.textContent  = isLoading ? "..." : "Se connecter";
+    }
 
-      document.getElementById("btnSignup").addEventListener("click", async () => {
-        const email = emailEl.value.trim();
-        const password = passEl.value;
+    // Garde-fou : Supabase chargé ?
+    if (!window.supabase || !window.supabase.createClient) {
+      setStatus("Erreur : Supabase ne s’est pas chargé. (Vérifie ta connexion / bloqueur de scripts)", true);
+    }
 
-        if (!email || !password) return setStatus("Merci de remplir email et mot de passe.", true);
-        if (password.length < 6) return setStatus("Le mot de passe doit contenir au moins 6 caractères.", true);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    async function handleSignup() {
+      const email = emailEl.value.trim();
+      const password = passEl.value;
+
+      if (!email || !password) return setStatus("Merci de remplir email et mot de passe.", true);
+      if (password.length < 6) return setStatus("Mot de passe : 6 caractères minimum.", true);
+
+      setLoading(true);
+      setStatus("Création du compte…");
+
+      try {
         const redirectUrl = new URL("profile.html", window.location.href).toString();
-
-        const { error, data } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: redirectUrl }
         });
 
-        if (error) return setStatus(error.message, true);
+        if (error) return setStatus("Signup error: " + error.message, true);
 
-        // Si Supabase renvoie une session, c’est connecté direct
+        // Selon ta config Supabase, il peut demander une confirmation email
         if (data?.session) {
+          setStatus("Compte créé + connecté. Redirection…");
           window.location.href = "profile.html";
         } else {
-          setStatus("Compte créé. Vérifie tes emails pour confirmer (si demandé).");
+          setStatus("Compte créé. Si Supabase demande une confirmation, vérifie tes emails puis reconnecte-toi.");
         }
-      });
+      } catch (e) {
+        setStatus("Exception signup: " + (e?.message || e), true);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-      document.getElementById("btnLogin").addEventListener("click", async () => {
-        const email = emailEl.value.trim();
-        const password = passEl.value;
+    async function handleLogin() {
+      const email = emailEl.value.trim();
+      const password = passEl.value;
 
-        if (!email || !password) return setStatus("Merci de remplir email et mot de passe.", true);
+      if (!email || !password) return setStatus("Merci de remplir email et mot de passe.", true);
 
+      setLoading(true);
+      setStatus("Connexion…");
+
+      try {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) return setStatus(error.message, true);
+        if (error) return setStatus("Login error: " + error.message, true);
 
+        setStatus("Connecté. Redirection…");
         window.location.href = "profile.html";
-      });
+      } catch (e) {
+        setStatus("Exception login: " + (e?.message || e), true);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-      // Si déjà connecté, on envoie direct au profil
-      (async () => {
+    // Clicks
+    btnSignup.addEventListener("click", handleSignup);
+    btnLogin.addEventListener("click", handleLogin);
+
+    // Entrée = login
+    passEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handleLogin();
+    });
+
+    // Si déjà connecté : redirection
+    (async () => {
+      try {
         const { data } = await supabase.auth.getSession();
-        if (data?.session) window.location.href = "profile.html";
-      })();
-    </script>
-  </div>
+        if (data?.session) {
+          setStatus("Session détectée. Redirection…");
+          window.location.href = "profile.html";
+        }
+      } catch (e) {
+        // on ne bloque pas la page si ça rate
+        console.warn(e);
+      }
+    })();
+  </script>
 </body>
 </html>
