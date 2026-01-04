@@ -1,88 +1,174 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Profil — Edenwood</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edenwood — Profil</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --bg:#0e1a14;
+      --accent:#9fe0b5;
+      --accent2:#6acb95;
+      --btn:#2a6b52;
+      --btnHover:#348c6a;
+      --text:#e6f2ea;
+    }
 
     body{
+      margin:0;
       min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      color:var(--text);
       font-family: Georgia, serif;
-      color:#e6efe9;
-      padding:2rem;
 
-      background:#0f1a14 url("assets/edenwood-bg.jpg")
-                 center / cover no-repeat fixed;
-      position:relative;
+      background-color:var(--bg);
+      background-image:url("assets/edenwood-bg.jpg");
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      background-attachment:fixed;
     }
 
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      background:rgba(15,26,20,.55);
-      pointer-events:none;
+    .overlay{
+      min-height:100vh;
+      padding:40px;
+      background:
+        radial-gradient(ellipse at center, rgba(14,26,20,0.15) 0%, rgba(14,26,20,0.65) 65%, rgba(14,26,20,0.85) 100%),
+        linear-gradient(to bottom, rgba(14,26,20,0.35), rgba(14,26,20,0.70));
+      display:grid;
+      place-items:center;
     }
 
-    .card{
-      width:100%;
-      max-width:420px;
-      background:rgba(15,26,20,.85);
-      border:1px solid rgba(230,239,233,.15);
-      border-radius:16px;
-      padding:2.5rem;
+    .wrap{
+      width:min(560px, 92vw);
       text-align:center;
-      backdrop-filter:blur(6px);
-      position:relative;
-      z-index:1;
+      animation:fadeIn 650ms ease-out both;
     }
 
-    h1{font-size:1.8rem;margin-bottom:.5rem;}
-    .subtitle{opacity:.85;font-style:italic;margin-bottom:1.5rem;}
-
-    .infos{
-      line-height:1.6;
-      margin-bottom:1.5rem;
+    @keyframes fadeIn{
+      from{opacity:0; transform:translateY(10px);}
+      to{opacity:1; transform:translateY(0);}
     }
 
-    .btn{
+    h1{
+      margin:0 0 10px 0;
+      font-family:"Cinzel", serif;
+      font-size:clamp(3.4rem, 6.5vw, 4.6rem);
+      font-weight:600;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      color:#b8f1cf;
+      text-shadow:
+        0 0 10px rgba(184,241,207,0.35),
+        0 0 28px rgba(106,203,149,0.22),
+        0 4px 14px rgba(0,0,0,0.70);
+    }
+
+    h1::after{
+      content:"";
       display:block;
-      padding:.7rem;
-      border-radius:10px;
-      background:#2e4d3a;
-      color:#e6efe9;
-      text-decoration:none;
-      margin-top:.7rem;
-      transition:background .2s ease;
+      width:150px;
+      height:1px;
+      margin:14px auto 0;
+      background:linear-gradient(to right, transparent, rgba(184,241,207,0.65), transparent);
     }
-    .btn:hover{background:#3e6a50;}
 
-    .btn.secondary{
+    .subtitle{
+      margin:10px 0 18px 0;
+      opacity:0.92;
+      font-size:1.05rem;
+    }
+
+    .panel{
+      margin:0 auto;
+      padding:22px 22px 18px;
+      border-radius:16px;
+      background:rgba(14,26,20,0.46);
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:
+        0 18px 60px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(159,224,181,0.06) inset;
+      backdrop-filter: blur(3px);
+    }
+
+    .panel:hover{
+      box-shadow:
+        0 18px 70px rgba(0,0,0,0.50),
+        0 0 0 1px rgba(159,224,181,0.10) inset,
+        0 0 34px rgba(106,203,149,0.08);
+      transition: box-shadow 220ms ease;
+    }
+
+    .info{
+      width:340px;
+      max-width:78vw;
+      margin:10px auto;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      text-align:left;
+    }
+
+    .info strong{ color:rgba(184,241,207,0.95); }
+
+    a.btn{
+      display:block;
+      width:340px;
+      max-width:78vw;
+      margin:10px auto;
+      padding:12px 12px;
+      border-radius:12px;
+      text-decoration:none;
+      text-align:center;
+      font-weight:600;
+      letter-spacing:0.2px;
+      background-color:var(--btn);
+      color:#fff;
+      transition: transform 120ms ease, background-color 160ms ease;
+    }
+
+    a.btn:hover{ background-color:var(--btnHover); transform:translateY(-1px); }
+    a.btn:active{ transform:translateY(0px); }
+
+    a.btn.secondary{
       background:transparent;
-      border:1px solid rgba(230,239,233,.3);
+      border:1px solid rgba(255,255,255,0.18);
+      color:var(--text);
+    }
+    a.btn.secondary:hover{
+      background:rgba(255,255,255,0.06);
+      transform:translateY(-1px);
+    }
+
+    @media (max-width:480px){
+      .overlay{padding:22px;}
+      .panel{padding:16px 16px 12px;}
+      h1{letter-spacing:0.08em;}
+      h1::after{width:120px;}
     }
   </style>
 </head>
 
 <body>
-  <div class="card">
-    <h1>Bienvenue à Edenwood</h1>
-    <p class="subtitle">Voyageur·se d’Edenwood</p>
+  <div class="overlay">
+    <div class="wrap">
+      <h1>Edenwood</h1>
+      <p class="subtitle">Bienvenue, voyageur·se.</p>
 
-    <div class="infos">
-      <p><strong>Rang :</strong> Éveillé</p>
-      <p><strong>Affinité :</strong> Forêt ancienne</p>
-      <p><strong>Carte liée :</strong> À venir…</p>
+      <div class="panel">
+        <div class="info"><strong>Rang :</strong> Éveillé</div>
+        <div class="info"><strong>Affinité :</strong> Forêt ancienne</div>
+        <div class="info"><strong>Carte liée :</strong> À venir…</div>
+
+        <a class="btn" href="index.html">Retour à l’accueil</a>
+        <a class="btn secondary" href="login.html">Changer de voyageur</a>
+      </div>
     </div>
-
-    <a href="index.html" class="btn">Retour à l’accueil</a>
-    <a href="login.html" class="btn secondary">Changer de voyageur</a>
   </div>
 </body>
 </html>
