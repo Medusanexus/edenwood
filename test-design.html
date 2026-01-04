@@ -21,74 +21,78 @@
       position:relative;
     }
 
-    /* voile sombre léger */
+    /* voile global encore plus léger */
     body::before{
       content:"";
       position:fixed;
       inset:0;
-      background:rgba(10,18,14,.38);
+      background:rgba(10,18,14,.32);
       pointer-events:none;
     }
 
     .layout{
+      width:100%;
+      max-width:420px;          /* 🔹 largeur MAÎTRE */
       text-align:center;
       position:relative;
       z-index:1;
     }
 
     .hero{
-      margin-bottom:1.6rem;
+      margin-bottom:1.2rem;
     }
 
-    /* TITRE lumineux */
+    /* TITRE plus lumineux */
     .hero h1{
       font-size:3rem;
       letter-spacing:.28em;
       font-weight:500;
-      color:#e9fff4;
+      color:#ecfff6;
+
       text-shadow:
-        0 0 10px rgba(120,255,190,.18),
-        0 0 28px rgba(80,220,150,.14),
-        0 8px 24px rgba(0,0,0,.55);
+        0 0 12px rgba(150,255,210,.22),
+        0 0 36px rgba(90,230,170,.18),
+        0 10px 28px rgba(0,0,0,.6);
     }
 
-    /* ligne verte dégradée */
+    /* ligne verte PLUS CLAIRE + alignée */
     .divider{
-      width:min(520px, 86vw);
-      height:2px;
-      margin:.9rem auto .8rem auto;
+      width:100%;               /* 🔹 même largeur que la card */
+      height:1px;
+      margin:.9rem auto .7rem auto;
+
       background: linear-gradient(
         to right,
-        rgba(80,220,150,0),
-        rgba(80,220,150,.35),
-        rgba(80,220,150,0)
+        rgba(120,255,190,0),
+        rgba(120,255,190,.28),
+        rgba(120,255,190,0)
       );
-      filter: drop-shadow(0 0 6px rgba(80,220,150,.18));
+
+      filter: drop-shadow(0 0 8px rgba(120,255,190,.25));
     }
 
     .hero p{
       font-style:italic;
       opacity:.9;
-      color:rgba(233,255,244,.85);
+      color:rgba(233,255,244,.9);
     }
 
-    /* CARTE EN VERRE */
+    /* CARTE : beaucoup plus transparente */
     .card{
       width:100%;
-      max-width:380px;
       margin-top:1.2rem;
-      padding:2rem 2.1rem;
+      padding:2rem 2.2rem;
 
-      background: rgba(15,26,20,.35);
-      border:1px solid rgba(200,255,225,.14);
+      background: rgba(15,26,20,.22); /* 🔹 laisse voir le décor */
+      border:1px solid rgba(200,255,225,.12);
       border-radius:18px;
 
-      backdrop-filter: blur(14px) saturate(120%);
-      -webkit-backdrop-filter: blur(14px) saturate(120%);
+      backdrop-filter: blur(16px) saturate(125%);
+      -webkit-backdrop-filter: blur(16px) saturate(125%);
 
       box-shadow:
-        0 24px 70px rgba(0,0,0,.55),
-        inset 0 1px 0 rgba(255,255,255,.06);
+        0 26px 80px rgba(0,0,0,.6),
+        inset 0 1px 0 rgba(255,255,255,.08);
 
       position:relative;
     }
@@ -101,7 +105,7 @@
       pointer-events:none;
       background: linear-gradient(
         to bottom,
-        rgba(255,255,255,.08),
+        rgba(255,255,255,.10),
         rgba(255,255,255,0) 45%
       );
     }
