@@ -1,89 +1,107 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Edenwood — Profil</title>
+    <meta charset="UTF-8">
+    <title>Profil — Edenwood</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <style>
-    body {
-      background-color: #0e1a14;
-      color: #e6f2ea;
-      font-family: Georgia, serif;
-      padding: 40px;
-    }
+        body {
+            min-height: 100vh;
+            background: #0f1a14;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Georgia, serif;
+            color: #e6efe9;
+        }
 
-    h1 {
-      color: #9fe0b5;
-      font-size: 2.2rem;
-      margin-bottom: .5rem;
-    }
+        .profile-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+        }
 
-    p { opacity: .9; margin: 10px 0; }
+        .profile-card {
+            background: rgba(15, 26, 20, 0.85);
+            border: 1px solid rgba(230, 239, 233, 0.15);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(6px);
+        }
 
-    button {
-      margin-top: 20px;
-      padding: 10px 14px;
-      border: none;
-      border-radius: 8px;
-      font-family: inherit;
-      cursor: pointer;
-      background-color: #2a6b52;
-      color: #fff;
-    }
+        .profile-card h1 {
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
 
-    button:hover { background-color: #348c6a; }
-  </style>
+        .username {
+            font-style: italic;
+            opacity: 0.85;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-infos p {
+            margin: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .profile-actions {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            text-decoration: none;
+            padding: 0.6rem;
+            border-radius: 8px;
+            background: #2e4d3a;
+            color: #e6efe9;
+            transition: background 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #3e6a50;
+        }
+
+        .btn.secondary {
+            background: transparent;
+            border: 1px solid rgba(230, 239, 233, 0.3);
+        }
+    </style>
 </head>
-
 <body>
 
-  <h1>Bienvenue dans Edenwood</h1>
-  <p id="userEmail">Âme liée : …</p>
+    <div class="profile-wrapper">
+        <div class="profile-card">
 
-  <button id="btnLogout" type="button">Se déconnecter</button>
+            <h1>Bienvenue à Edenwood</h1>
+            <p class="username">Voyageur·se d’Edenwood</p>
 
-  <script>
-    const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
+            <div class="profile-infos">
+                <p><strong>Rang :</strong> Éveillé</p>
+                <p><strong>Affinité :</strong> Forêt ancienne</p>
+                <p><strong>Carte liée :</strong> À venir…</p>
+            </div>
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            <div class="profile-actions">
+                <a href="index.html" class="btn">Retour à l’accueil</a>
+                <a href="login.html" class="btn secondary">Changer de voyageur</a>
+            </div>
 
-    // Nettoyage de l'URL (retire les tokens)
-    if (window.location.hash) {
-      history.replaceState(null, "", window.location.pathname);
-    }
-
-    async function requireUser() {
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
-        window.location.href = "login.html";
-        return;
-      }
-
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        window.location.href = "login.html";
-        return;
-      }
-
-      document.getElementById("userEmail").textContent =
-        "Âme liée : " + userData.user.email;
-    }
-
-    document.getElementById("btnLogout").addEventListener("click", async () => {
-      await supabase.auth.signOut();
-      window.location.href = "login.html";
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) window.location.href = "login.html";
-    });
-
-    requireUser();
-  </script>
+        </div>
+    </div>
 
 </body>
 </html>
