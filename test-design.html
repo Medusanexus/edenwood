@@ -1,151 +1,191 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Edenwood — Test design</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edenwood — Test Design (Référence)</title>
+
+  <!-- Police fantasy élégante (titre uniquement) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --bg:#0e1a14;
+      --accent:#9fe0b5;
+      --accent2:#6acb95;
+      --btn:#2a6b52;
+      --btnHover:#348c6a;
+      --text:#e6f2ea;
+    }
 
     body{
+      margin:0;
       min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      color:var(--text);
       font-family: Georgia, serif;
-      color:#e6efe9;
-      padding:2rem;
 
-      background:#0f1a14 url("assets/edenwood-bg.jpg")
-                 center / cover no-repeat fixed;
-      position:relative;
+      background-color:var(--bg);
+      background-image:url("assets/edenwood-bg.jpg");
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      background-attachment:fixed;
     }
 
-    /* voile global léger */
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.20);
-      pointer-events:none;
-    }
-
-    .layout{
-      width:100%;
-      max-width:420px;
-      text-align:center;
-      position:relative;
-      z-index:1;
-    }
-
-    .hero{ margin-bottom:1.15rem; }
-
-    .hero h1{
-      font-size:3rem;
-      letter-spacing:.28em;
-      font-weight:500;
-      color:#ecfff6;
-      text-shadow:
-        0 0 14px rgba(150,255,210,.26),
-        0 0 44px rgba(90,230,170,.20),
-        0 10px 28px rgba(0,0,0,.65);
-    }
-
-    .divider{
-      width:100%;
-      height:1px;
-      margin:.9rem auto .7rem auto;
-      background: linear-gradient(
-        to right,
-        rgba(120,255,190,0),
-        rgba(120,255,190,.18),
-        rgba(120,255,190,0)
-      );
-      filter: drop-shadow(0 0 10px rgba(120,255,190,.22));
-    }
-
-    .hero p{
-      font-style:italic;
-      opacity:.92;
-      color:rgba(233,255,244,.92);
-      text-shadow: 0 8px 18px rgba(0,0,0,.45);
-    }
-
-    /* --- CARTE : fallback “verre” qui marche même si backdrop-filter est OFF --- */
-    .card{
-      width:100%;
-      margin-top:1.2rem;
-      padding:2rem 2.2rem;
-      border-radius:18px;
-      position:relative;
-      overflow:hidden; /* important pour les effets internes */
-
-      /* au lieu d’un gros vert, on met une teinte très neutre et basse */
-      background: rgba(8, 12, 10, .22);
-
-      /* bord fin lumineux */
-      border:1px solid rgba(210,255,235,.16);
-
-      /* ombre + halo très doux */
-      box-shadow:
-        0 28px 90px rgba(0,0,0,.62),
-        0 0 0 1px rgba(120,255,190,.05),
-        0 0 40px rgba(120,255,190,.05);
-    }
-
-    /* highlight + texture “verre” */
-    .card::before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      border-radius:18px;
-      pointer-events:none;
-
+    /* voile doux + léger vignettage (lisibilité plein écran) */
+    .overlay{
+      min-height:100vh;
+      padding:40px;
       background:
-        /* highlight en haut */
-        linear-gradient(to bottom, rgba(255,255,255,.12), rgba(255,255,255,0) 45%),
-        /* léger voile verdâtre très soft */
-        radial-gradient(900px 260px at 50% -20%, rgba(120,255,190,.10), rgba(120,255,190,0) 60%),
-        /* micro-texture (donne l’impression de verre) */
-        repeating-linear-gradient(
-          135deg,
-          rgba(255,255,255,.03) 0px,
-          rgba(255,255,255,.03) 2px,
-          rgba(255,255,255,0) 6px,
-          rgba(255,255,255,0) 10px
-        );
-      opacity:.55;
-      mix-blend-mode: screen;
+        radial-gradient(ellipse at center,
+          rgba(14,26,20,0.15) 0%,
+          rgba(14,26,20,0.65) 65%,
+          rgba(14,26,20,0.85) 100%
+        ),
+        linear-gradient(to bottom, rgba(14,26,20,0.35), rgba(14,26,20,0.70));
+      display:grid;
+      place-items:center;
     }
 
-    /* On tente le vrai blur si le navigateur le supporte */
-    @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-      .card{
-        background: rgba(10, 16, 13, .10);
-        backdrop-filter: blur(22px) saturate(140%) contrast(105%);
-        -webkit-backdrop-filter: blur(22px) saturate(140%) contrast(105%);
-      }
-      .card::before{
-        opacity:.40; /* un peu moins de “texture” quand le blur existe */
-        mix-blend-mode: normal;
-      }
+    .wrap{
+      width:min(560px, 92vw);
+      text-align:center;
+      animation:fadeIn 650ms ease-out both;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0; transform:translateY(10px);}
+      to{opacity:1; transform:translateY(0);}
+    }
+
+    /* TITRE - plus grand + typographie "fantasy" */
+    h1{
+      margin:0 0 10px 0;
+      font-family:"Cinzel", serif;
+      font-size:clamp(3.4rem, 6.5vw, 4.6rem);
+      font-weight:600;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      color:#b8f1cf;
+
+      text-shadow:
+        0 0 10px rgba(184,241,207,0.35),
+        0 0 28px rgba(106,203,149,0.22),
+        0 4px 14px rgba(0,0,0,0.70);
+    }
+
+    /* Soulignement mystique discret */
+    h1::after{
+      content:"";
+      display:block;
+      width:150px;
+      height:1px;
+      margin:14px auto 0;
+      background:linear-gradient(
+        to right,
+        transparent,
+        rgba(184,241,207,0.65),
+        transparent
+      );
+    }
+
+    .subtitle{
+      margin:10px 0 18px 0;
+      opacity:0.92;
+      font-size:1.05rem;
+    }
+
+    .panel{
+      margin:0 auto;
+      padding:22px 22px 18px;
+      border-radius:16px;
+
+      background:rgba(14,26,20,0.46);
+      border:1px solid rgba(255,255,255,0.12);
+
+      box-shadow:
+        0 18px 60px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(159,224,181,0.06) inset;
+
+      backdrop-filter: blur(3px);
+    }
+
+    .panel:hover{
+      box-shadow:
+        0 18px 70px rgba(0,0,0,0.50),
+        0 0 0 1px rgba(159,224,181,0.10) inset,
+        0 0 34px rgba(106,203,149,0.08);
+      transition:box-shadow 220ms ease;
+    }
+
+    /* éléments “profil” de test */
+    .info{
+      width:340px;
+      max-width:78vw;
+      margin:10px auto;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      text-align:left;
+    }
+    .info strong{ color:rgba(184,241,207,0.95); }
+
+    a.btn{
+      display:block;
+      width:340px;
+      max-width:78vw;
+      margin:10px auto;
+      padding:12px 12px;
+      border-radius:12px;
+      text-decoration:none;
+      text-align:center;
+      font-weight:600;
+      letter-spacing:0.2px;
+      background-color:var(--btn);
+      color:#fff;
+      transition:transform 120ms ease, background-color 160ms ease;
+    }
+
+    a.btn:hover{ background-color:var(--btnHover); transform:translateY(-1px); }
+    a.btn:active{ transform:translateY(0px); }
+
+    a.btn.secondary{
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.18);
+      color:var(--text);
+    }
+    a.btn.secondary:hover{
+      background:rgba(255,255,255,0.06);
+      transform:translateY(-1px);
+    }
+
+    @media (max-width:480px){
+      .overlay{padding:22px;}
+      .panel{padding:16px 16px 12px;}
+      h1{letter-spacing:0.08em;}
+      h1::after{width:120px;}
     }
   </style>
 </head>
 
 <body>
-  <div class="layout">
+  <div class="overlay">
+    <div class="wrap">
+      <h1>Edenwood</h1>
+      <p class="subtitle">Page de référence — design validé.</p>
 
-    <header class="hero">
-      <h1>EDENWOOD</h1>
-      <div class="divider"></div>
-      <p>Entre dans la clairière…</p>
-    </header>
+      <div class="panel">
+        <div class="info"><strong>Rang :</strong> Éveillé</div>
+        <div class="info"><strong>Affinité :</strong> Forêt ancienne</div>
+        <div class="info"><strong>Carte liée :</strong> À venir…</div>
 
-    <div class="card">
-      Contenu de test
+        <a class="btn" href="index.html">Bouton principal</a>
+        <a class="btn secondary" href="login.html">Bouton secondaire</a>
+      </div>
     </div>
-
   </div>
 </body>
 </html>
