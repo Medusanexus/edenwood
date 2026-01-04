@@ -5,12 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Edenwood — Connexion</title>
 
-  <!-- Police fantasy (titre uniquement) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
 
-  <!-- CSS centralisé -->
   <link rel="stylesheet" href="assets/style.css">
 </head>
 
@@ -27,114 +25,82 @@
         <button id="btnSignup" type="button">Créer un compte</button>
         <button id="btnLogin" type="button">Se connecter</button>
 
-        <div id="status">Chargement…</div>
+        <div id="status"></div>
 
-        <a class="btn secondary" href="index.html">Retour</a>
+        <nav class="nav">
+          <a href="index.html">Accueil</a>
+          <a href="profile.html" data-auth="in">Profil</a>
+          <a href="login.html" data-auth="out">Connexion</a>
+          <a href="#" id="btnLogout" data-auth="in">Déconnexion</a>
+        </nav>
       </div>
     </div>
   </div>
 
   <script type="module">
-    // ✅ Import Supabase (ESM) — plus fiable que window.supabase
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-    // ⚠️ Tes clés
     const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
     const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
-
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const emailEl   = document.getElementById("email");
-    const passEl    = document.getElementById("password");
-    const statusEl  = document.getElementById("status");
-    const btnSignup = document.getElementById("btnSignup");
-    const btnLogin  = document.getElementById("btnLogin");
+    const emailEl  = document.getElementById("email");
+    const passEl   = document.getElementById("password");
+    const statusEl = document.getElementById("status");
 
     function setStatus(text, isError = false) {
       statusEl.textContent = text;
       statusEl.className = isError ? "error" : "";
     }
 
-    function setLoading(on) {
-      btnSignup.disabled = on;
-      btnLogin.disabled = on;
-      btnSignup.textContent = on ? "..." : "Créer un compte";
-      btnLogin.textContent  = on ? "..." : "Se connecter";
-    }
+    // Déjà connecté ? -> profil
+    const { data } = await supabase.auth.getSession();
+    if (data?.session) window.location.href = "profile.html";
 
-    setStatus("JS OK ✅ (Supabase chargé)");
-
-    async function handleSignup() {
+    document.getElementById("btnSignup").addEventListener("click", async () => {
       const email = emailEl.value.trim();
       const password = passEl.value;
 
       if (!email || !password) return setStatus("Merci de remplir email et mot de passe.", true);
       if (password.length < 6) return setStatus("Mot de passe : 6 caractères minimum.", true);
 
-      setLoading(true);
       setStatus("Création du compte…");
 
-      try {
-        const redirectUrl = new URL("profile.html", window.location.href).toString();
+      const redirectUrl = new URL("profile.html", window.location.href).toString();
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: redirectUrl }
+      });
 
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: redirectUrl }
-        });
+      if (error) return setStatus(error.message, true);
 
-        if (error) return setStatus("Signup error: " + error.message, true);
-
-        if (data?.session) {
-          setStatus("Compte créé + connecté. Redirection…");
-          window.location.href = "profile.html";
-        } else {
-          setStatus("Compte créé. Vérifie tes emails si confirmation demandée, puis reconnecte-toi.");
-        }
-      } catch (e) {
-        setStatus("Exception signup: " + (e?.message || e), true);
-      } finally {
-        setLoading(false);
+      if (data?.session) {
+        window.location.href = "profile.html";
+      } else {
+        setStatus("Compte créé. Vérifie tes emails si confirmation demandée.");
       }
-    }
+    });
 
-    async function handleLogin() {
+    document.getElementById("btnLogin").addEventListener("click", async () => {
       const email = emailEl.value.trim();
       const password = passEl.value;
 
       if (!email || !password) return setStatus("Merci de remplir email et mot de passe.", true);
 
-      setLoading(true);
       setStatus("Connexion…");
 
-      try {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) return setStatus("Login error: " + error.message, true);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return setStatus(error.message, true);
 
-        setStatus("Connecté. Redirection…");
-        window.location.href = "profile.html";
-      } catch (e) {
-        setStatus("Exception login: " + (e?.message || e), true);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    btnSignup.addEventListener("click", handleSignup);
-    btnLogin.addEventListener("click", handleLogin);
-
-    // Entrée = login
-    passEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") handleLogin();
+      window.location.href = "profile.html";
     });
 
-    // Si déjà connecté : redirection
-    try {
-      const { data } = await supabase.auth.getSession();
-      if (data?.session) window.location.href = "profile.html";
-    } catch {
-      // pas bloquant
-    }
+    passEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btnLogin").click();
+    });
   </script>
+
+  <script type="module" src="assets/nav.js"></script>
 </body>
 </html>
