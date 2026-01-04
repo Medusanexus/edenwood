@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Edenwood — Profil</title>
 
-  <!-- Supabase v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -16,12 +15,16 @@
       padding: 40px;
     }
 
-    h1 { color: #9fe0b5; font-size: 2.2rem; margin-bottom: .5rem; }
-    p  { opacity: .92; margin: 10px 0; }
+    h1 {
+      color: #9fe0b5;
+      font-size: 2.2rem;
+      margin-bottom: .5rem;
+    }
+
+    p { opacity: .9; margin: 10px 0; }
 
     button {
-      display: inline-block;
-      margin-top: 18px;
+      margin-top: 20px;
       padding: 10px 14px;
       border: none;
       border-radius: 8px;
@@ -30,100 +33,57 @@
       background-color: #2a6b52;
       color: #fff;
     }
-    button:hover { background-color: #348c6a; }
 
-    #status {
-      margin-top: 16px;
-      padding: 12px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.14);
-      white-space: pre-wrap;
-      font-size: 0.95rem;
-    }
-    .ok { color: #5bf2b0; }
-    .err { color: #ff6b6b; }
-    .muted { opacity: .9; }
+    button:hover { background-color: #348c6a; }
   </style>
 </head>
 
 <body>
+
   <h1>Bienvenue dans Edenwood</h1>
   <p id="userEmail">Âme liée : …</p>
 
   <button id="btnLogout" type="button">Se déconnecter</button>
 
-  <div id="status" class="muted">Status : en attente…</div>
-
   <script>
     const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
     const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
 
-    const statusEl = document.getElementById("status");
-    const userEmailEl = document.getElementById("userEmail");
-    const btnLogout = document.getElementById("btnLogout");
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    function setStatus(text, cls="muted") {
-      statusEl.className = cls;
-      statusEl.textContent = text;
-      console.log(text);
+    // Nettoyage de l'URL (retire les tokens)
+    if (window.location.hash) {
+      history.replaceState(null, "", window.location.pathname);
     }
-
-    // ✅ Nettoie l'URL si on a un #access_token / #type=signup etc.
-    // (évite de laisser des tokens dans l'historique)
-    if (window.location.hash && window.location.hash.length > 1) {
-      history.replaceState(null, "", window.location.pathname + window.location.search);
-    }
-
-    // ✅ Vérifie que Supabase est bien chargé
-    if (!window.supabase || !window.supabase.createClient) {
-      setStatus("Erreur : Supabase JS n'a pas chargé.", "err");
-      throw new Error("Supabase JS absent");
-    }
-
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function requireUser() {
-      setStatus("Vérification de session…", "muted");
-
-      // 1) On regarde la session (rapide)
-      const { data: sessionData, error: sessionErr } = await client.auth.getSession();
-      if (sessionErr) {
-        setStatus("Erreur session : " + sessionErr.message, "err");
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
         window.location.href = "login.html";
         return;
       }
 
-      if (!sessionData?.session) {
-        setStatus("Aucune session : redirection vers login…", "err");
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
         window.location.href = "login.html";
         return;
       }
 
-      // 2) On récupère le user (propre)
-      const { data: userData, error: userErr } = await client.auth.getUser();
-      if (userErr || !userData?.user) {
-        setStatus("Utilisateur introuvable : redirection…", "err");
-        window.location.href = "login.html";
-        return;
-      }
-
-      userEmailEl.textContent = "Âme liée : " + (userData.user.email ?? "(email inconnu)");
-      setStatus("Connecté ✅", "ok");
+      document.getElementById("userEmail").textContent =
+        "Âme liée : " + userData.user.email;
     }
 
-    btnLogout.addEventListener("click", async () => {
-      setStatus("Déconnexion…", "muted");
-      await client.auth.signOut();
+    document.getElementById("btnLogout").addEventListener("click", async () => {
+      await supabase.auth.signOut();
       window.location.href = "login.html";
     });
 
-    // Si la session saute (logout ailleurs), on renvoie au login
-    client.auth.onAuthStateChange((_event, newSession) => {
-      if (!newSession) window.location.href = "login.html";
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) window.location.href = "login.html";
     });
 
     requireUser();
   </script>
+
 </body>
 </html>
