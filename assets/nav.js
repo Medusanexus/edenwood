@@ -20,12 +20,13 @@ async function run() {
   const { data } = await supabase.auth.getSession();
   const isAuthed = !!data?.session;
 
-  document.querySelectorAll("[data-auth='in']").forEach(el => setVisible(el, isAuthed));
-  document.querySelectorAll("[data-auth='out']").forEach(el => setVisible(el, !isAuthed));
+  // Elements visibles seulement si connecté / non connecté
+  document.querySelectorAll('[data-auth="in"]').forEach((el) => setVisible(el, isAuthed));
+  document.querySelectorAll('[data-auth="out"]').forEach((el) => setVisible(el, !isAuthed));
 
-  // Hook sur TOUS les boutons/liens de logout possibles
-  const btnLogout = document.getElementById("btnLogout");     // bouton principal
-  const linkLogout = document.getElementById("linkLogout");   // lien nav
+  // Hooks logout (bouton principal + lien nav)
+  const btnLogout = document.getElementById("btnLogout");
+  const linkLogout = document.getElementById("linkLogout");
 
   if (btnLogout) btnLogout.addEventListener("click", logout);
   if (linkLogout) linkLogout.addEventListener("click", logout);
