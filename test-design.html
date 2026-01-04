@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Test Edenwood</title>
+  <title>Edenwood — Test design</title>
 
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -21,11 +21,12 @@
       position:relative;
     }
 
+    /* voile sombre léger */
     body::before{
       content:"";
       position:fixed;
       inset:0;
-      background:rgba(15,26,20,.5);
+      background:rgba(10,18,14,.38);
       pointer-events:none;
     }
 
@@ -36,31 +37,59 @@
     }
 
     .hero{
-      margin-bottom:1.8rem;
+      margin-bottom:1.6rem;
     }
 
+    /* TITRE lumineux */
     .hero h1{
       font-size:3rem;
-      letter-spacing:.25em;
+      letter-spacing:.28em;
       font-weight:500;
-      color:#d8efe2;
+      color:#e9fff4;
+      text-shadow:
+        0 0 10px rgba(120,255,190,.18),
+        0 0 28px rgba(80,220,150,.14),
+        0 8px 24px rgba(0,0,0,.55);
+    }
+
+    /* ligne verte dégradée */
+    .divider{
+      width:min(520px, 86vw);
+      height:2px;
+      margin:.9rem auto .8rem auto;
+      background: linear-gradient(
+        to right,
+        rgba(80,220,150,0),
+        rgba(80,220,150,.35),
+        rgba(80,220,150,0)
+      );
+      filter: drop-shadow(0 0 6px rgba(80,220,150,.18));
     }
 
     .hero p{
-      margin-top:.5rem;
       font-style:italic;
-      opacity:.85;
+      opacity:.9;
+      color:rgba(233,255,244,.85);
     }
 
+    /* CARTE EN VERRE */
     .card{
       width:100%;
       max-width:380px;
-      background:rgba(15,26,20,.72);
-      border:1px solid rgba(230,239,233,.18);
-      border-radius:16px;
-      padding:2rem;
-      backdrop-filter:blur(10px);
-      box-shadow:0 25px 60px rgba(0,0,0,.6);
+      margin-top:1.2rem;
+      padding:2rem 2.1rem;
+
+      background: rgba(15,26,20,.35);
+      border:1px solid rgba(200,255,225,.14);
+      border-radius:18px;
+
+      backdrop-filter: blur(14px) saturate(120%);
+      -webkit-backdrop-filter: blur(14px) saturate(120%);
+
+      box-shadow:
+        0 24px 70px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(255,255,255,.06);
+
       position:relative;
     }
 
@@ -68,13 +97,13 @@
       content:"";
       position:absolute;
       inset:0;
-      border-radius:16px;
-      background:linear-gradient(
+      border-radius:18px;
+      pointer-events:none;
+      background: linear-gradient(
         to bottom,
-        rgba(255,255,255,.06),
+        rgba(255,255,255,.08),
         rgba(255,255,255,0) 45%
       );
-      pointer-events:none;
     }
   </style>
 </head>
@@ -84,11 +113,12 @@
 
     <header class="hero">
       <h1>EDENWOOD</h1>
+      <div class="divider"></div>
       <p>Entre dans la clairière…</p>
     </header>
 
     <div class="card">
-      <p>Contenu de test</p>
+      Contenu de test
     </div>
 
   </div>
