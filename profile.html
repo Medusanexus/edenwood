@@ -10,27 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
 
-  <!-- CSS centralisé -->
+  <!-- CSS centralisé (IMPORTANT) -->
   <link rel="stylesheet" href="assets/style.css">
-
-  <!-- Petit fallback nav si jamais (au cas où) -->
-  <style>
-    .nav{
-      margin-top:18px;
-      padding-top:12px;
-      border-top:1px solid rgba(255,255,255,0.12);
-      display:flex;
-      justify-content:center;
-      gap:18px;
-      font-size:0.95rem;
-      opacity:0.85;
-    }
-    .nav a{
-      color:rgba(230,242,234,0.9);
-      text-decoration:none;
-    }
-    .nav a:hover{ text-decoration: underline; }
-  </style>
 </head>
 
 <body>
@@ -47,7 +28,6 @@
         <a class="btn" href="index.html">Retour à l’accueil</a>
         <a class="btn secondary" href="#" id="btnLogout">Changer de voyageur</a>
 
-        <!-- NAV (on la veut aussi sur le profil) -->
         <nav class="nav">
           <a href="index.html">Accueil</a>
           <a href="profile.html">Profil</a>
@@ -57,7 +37,7 @@
     </div>
   </div>
 
-  <!-- Supabase (ESM) : plus fiable -->
+  <!-- Supabase (ESM) -->
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
@@ -65,13 +45,11 @@
     const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Optionnel mais super rassurant : si pas connecté -> retour login
+    // Si pas connecté -> login
     const { data } = await supabase.auth.getSession();
-    if (!data?.session) {
-      window.location.href = "login.html";
-    }
+    if (!data?.session) window.location.href = "login.html";
 
-    // Déconnexion propre
+    // Déconnexion
     document.getElementById("btnLogout").addEventListener("click", async (e) => {
       e.preventDefault();
       await supabase.auth.signOut();
