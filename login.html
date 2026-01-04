@@ -2,73 +2,92 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Edenwood — Profil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edenwood — Connexion</title>
 
-  <!-- IMPORTANT : mets ici EXACTEMENT le même href que dans login.html -->
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/style.css" />
 </head>
 
 <body>
   <div class="overlay">
     <div class="wrap">
-
-      <h1>EDENWOOD</h1>
-      <p class="subtitle">Bienvenue, voyageur·se.</p>
+      <h1>Edenwood</h1>
+      <p class="subtitle">Entre dans la clairière.</p>
 
       <div class="panel">
+        <input id="email" type="email" placeholder="Email" />
+        <input id="password" type="password" placeholder="Mot de passe" />
 
-        <!-- INFOS PROFIL -->
-        <div class="info"><strong>Pseudo :</strong> <span id="profile-pseudo">—</span></div>
-        <div class="info"><strong>Email :</strong> <span id="profile-email">—</span></div>
-        <div class="info"><strong>Rang :</strong> <span id="profile-rank">Éveillé</span></div>
-        <div class="info"><strong>Affinité :</strong> <span id="profile-affinity">Forêt ancienne</span></div>
-        <div class="info"><strong>Carte liée :</strong> <span id="profile-card">À venir…</span></div>
-
-        <!-- 🔐 BLOC CHANGEMENT EMAIL (UTILISE .info donc ton style s'applique) -->
-        <div class="info warning" id="email-pending-box" style="display:none;">
-          <p class="info-title" style="margin:0 0 6px 0;"><strong>🔐 Changement d’email en cours</strong></p>
-          <p class="info-text" style="margin:0;">
-            Pour des raisons de sécurité, la modification de ton email doit être confirmée
-            <strong>depuis ton ancien email ET ton nouvel email</strong>.
-          </p>
-          <p class="info-text" style="margin:6px 0 0 0;">
-            Une fois les deux confirmations effectuées, reconnecte-toi avec ton nouvel email.
-          </p>
-        </div>
-
-        <!-- PARAMETRES -->
-        <div class="info" style="text-align:center;">
-          <strong>Paramètres</strong><br>
-          <span style="opacity:0.9;">Modifier ton pseudo, ton email ou ton mot de passe</span>
-        </div>
-
-        <input id="newPseudo" type="text" placeholder="Nouveau pseudo" />
-        <button id="btnSavePseudo">Enregistrer le pseudo</button>
-
-        <input id="newEmail" type="email" placeholder="Nouvel email" />
-        <button id="btnChangeEmail">Changer l’email</button>
-
-        <input id="newPassword" type="password" placeholder="Nouveau mot de passe" />
-        <input id="confirmPassword" type="password" placeholder="Confirmer le mot de passe" />
-        <button id="btnChangePassword">Changer le mot de passe</button>
+        <button id="btnSignup" type="button">Créer un compte</button>
+        <button id="btnLogin" type="button">Se connecter</button>
 
         <div id="status"></div>
 
-        <a class="btn secondary" href="index.html">Retour à l’accueil</a>
-        <button id="btnLogout">Changer de voyageur</button>
-
-        <div class="nav">
-          <a href="index.html">Accueil</a>
-          <a href="profile.html">Profil</a>
-          <a href="login.html">Connexion</a>
-        </div>
-
+        <a class="btn secondary" href="index.html">Retour</a>
       </div>
     </div>
   </div>
 
-  <!-- ton script profil si tu en as un -->
-  <script src="assets/nav.js"></script>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const emailEl = document.getElementById("email");
+    const passEl  = document.getElementById("password");
+    const statusEl = document.getElementById("status");
+
+    function setStatus(text, isError = false) {
+      statusEl.textContent = text;
+      statusEl.className = isError ? "error" : "";
+    }
+
+    document.getElementById("btnSignup").addEventListener("click", async () => {
+      const email = emailEl.value.trim();
+      const password = passEl.value;
+
+      if (!email || !password) return setStatus("Merci de remplir email et mot de passe.", true);
+      if (password.length < 6) return setStatus("Le mot de passe doit contenir au moins 6 caractères.", true);
+
+      const { error, data } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: new URL("profile.html", window.location.href).toString()
+        }
+      });
+
+      if (error) return setStatus(error.message, true);
+
+      if (data.session) {
+        window.location.href = "profile.html";
+      } else {
+        setStatus("Compte créé. Vérifie tes emails pour confirmer.");
+      }
+    });
+
+    document.getElementById("btnLogin").addEventListener("click", async () => {
+      const email = emailEl.value.trim();
+      const password = passEl.value;
+
+      if (!email || !password) return setStatus("Merci de remplir email et mot de passe.", true);
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return setStatus(error.message, true);
+
+      window.location.href = "profile.html";
+    });
+
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) window.location.href = "profile.html";
+    })();
+  </script>
 </body>
 </html>
