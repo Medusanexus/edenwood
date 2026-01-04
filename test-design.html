@@ -21,7 +21,7 @@
       position:relative;
     }
 
-    /* voile global PLUS léger (sinon on “tue” les détails) */
+    /* voile global léger */
     body::before{
       content:"";
       position:fixed;
@@ -58,10 +58,10 @@
       background: linear-gradient(
         to right,
         rgba(120,255,190,0),
-        rgba(120,255,190,.22),
+        rgba(120,255,190,.18),
         rgba(120,255,190,0)
       );
-      filter: drop-shadow(0 0 10px rgba(120,255,190,.25));
+      filter: drop-shadow(0 0 10px rgba(120,255,190,.22));
     }
 
     .hero p{
@@ -71,41 +71,64 @@
       text-shadow: 0 8px 18px rgba(0,0,0,.45);
     }
 
-    /* GLASS VISIBLE : quasi transparent + bord lumineux + glow */
+    /* --- CARTE : fallback “verre” qui marche même si backdrop-filter est OFF --- */
     .card{
       width:100%;
       margin-top:1.2rem;
       padding:2rem 2.2rem;
       border-radius:18px;
       position:relative;
+      overflow:hidden; /* important pour les effets internes */
 
-      /* le “verre” : presque transparent */
-      background: rgba(10, 16, 13, .08);
+      /* au lieu d’un gros vert, on met une teinte très neutre et basse */
+      background: rgba(8, 12, 10, .22);
 
-      /* bord lumineux fin (c’est ça qui “dessine” le verre) */
-      border: 1px solid rgba(210, 255, 235, .18);
+      /* bord fin lumineux */
+      border:1px solid rgba(210,255,235,.16);
 
-      /* blur fort pour qu’on sente le flou même sur un fond sombre */
-      backdrop-filter: blur(26px) saturate(140%) contrast(105%);
-      -webkit-backdrop-filter: blur(26px) saturate(140%) contrast(105%);
-
-      /* ombre + léger halo vert */
+      /* ombre + halo très doux */
       box-shadow:
         0 28px 90px rgba(0,0,0,.62),
-        0 0 0 1px rgba(120,255,190,.06),
-        0 0 40px rgba(120,255,190,.06);
+        0 0 0 1px rgba(120,255,190,.05),
+        0 0 40px rgba(120,255,190,.05);
     }
 
-    /* highlight en haut + un soupçon de “teinte verre” */
+    /* highlight + texture “verre” */
     .card::before{
       content:"";
       position:absolute;
-      inset:0;
+      inset:-1px;
       border-radius:18px;
       pointer-events:none;
+
       background:
-        linear-gradient(to bottom, rgba(255,255,255,.10), rgba(255,255,255,0) 45%),
-        radial-gradient(800px 220px at 50% -20%, rgba(120,255,190,.10), rgba(120,255,190,0) 60%);
+        /* highlight en haut */
+        linear-gradient(to bottom, rgba(255,255,255,.12), rgba(255,255,255,0) 45%),
+        /* léger voile verdâtre très soft */
+        radial-gradient(900px 260px at 50% -20%, rgba(120,255,190,.10), rgba(120,255,190,0) 60%),
+        /* micro-texture (donne l’impression de verre) */
+        repeating-linear-gradient(
+          135deg,
+          rgba(255,255,255,.03) 0px,
+          rgba(255,255,255,.03) 2px,
+          rgba(255,255,255,0) 6px,
+          rgba(255,255,255,0) 10px
+        );
+      opacity:.55;
+      mix-blend-mode: screen;
+    }
+
+    /* On tente le vrai blur si le navigateur le supporte */
+    @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .card{
+        background: rgba(10, 16, 13, .10);
+        backdrop-filter: blur(22px) saturate(140%) contrast(105%);
+        -webkit-backdrop-filter: blur(22px) saturate(140%) contrast(105%);
+      }
+      .card::before{
+        opacity:.40; /* un peu moins de “texture” quand le blur existe */
+        mix-blend-mode: normal;
+      }
     }
   </style>
 </head>
