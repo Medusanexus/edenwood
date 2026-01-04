@@ -5,51 +5,24 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Edenwood — Connexion</title>
 
-  <!-- ✅ CDN alternatif (souvent moins bloqué que unpkg) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    body {
-      background-color: #0e1a14;
-      color: #e6f2ea;
-      font-family: Georgia, serif;
-      padding: 40px;
-    }
-    h1 { color: #9fe0b5; font-size: 2.2rem; margin-bottom: 0.5rem; }
-    p { margin-bottom: 1.0rem; opacity: 0.9; }
-
-    input, button {
-      display: block;
-      margin: 10px 0;
-      padding: 12px;
-      font-family: inherit;
-      border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-    }
-    input { width: 280px; }
-    button {
-      background-color: #2a6b52;
-      color: white;
-      cursor: pointer;
-      width: 220px;
-    }
-    button:hover { background-color: #348c6a; }
-
+    body { background-color:#0e1a14; color:#e6f2ea; font-family:Georgia,serif; padding:40px; }
+    h1 { color:#9fe0b5; font-size:2.2rem; margin-bottom:.5rem; }
+    p { margin-bottom:1rem; opacity:.9; }
+    input, button { display:block; margin:10px 0; padding:12px; font-family:inherit; border-radius:8px; border:none; font-size:1rem; }
+    input { width:280px; }
+    button { background:#2a6b52; color:#fff; cursor:pointer; width:220px; }
+    button:hover { background:#348c6a; }
     #status {
-      margin-top: 14px;
-      padding: 10px 12px;
-      width: 520px;
-      max-width: 100%;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.14);
-      white-space: pre-wrap;
-      font-size: 0.95rem;
+      margin-top:14px; padding:10px 12px; width:520px; max-width:100%;
+      border-radius:10px; background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.14); white-space:pre-wrap; font-size:.95rem;
     }
-    .ok { color: #5bf2b0; }
-    .err { color: #ff6b6b; }
-    .muted { opacity: .9; }
+    .ok { color:#5bf2b0; }
+    .err { color:#ff6b6b; }
+    .muted { opacity:.9; }
   </style>
 </head>
 
@@ -60,29 +33,92 @@
   <input id="email" type="email" placeholder="Email" />
   <input id="password" type="password" placeholder="Mot de passe" />
 
-  <!-- type="button" évite tout comportement de submit si un form traîne -->
-  <button type="button" onclick="signUp()">Créer un compte</button>
-  <button type="button" onclick="signIn()">Se connecter</button>
+  <button id="btnSignup" type="button">Créer un compte</button>
+  <button id="btnLogin" type="button">Se connecter</button>
 
   <div id="status" class="muted">Status : en attente…</div>
 
   <script>
-    /*********************************************************
-     * 🔑 SUPABASE — TES VALEURS
-     *********************************************************/
     const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
     const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
 
     const statusEl = document.getElementById("status");
     const emailEl  = document.getElementById("email");
     const passEl   = document.getElementById("password");
+    const btnSignup = document.getElementById("btnSignup");
+    const btnLogin  = document.getElementById("btnLogin");
 
-    function setStatus(text, cls = "muted") {
+    function setStatus(text, cls="muted") {
       statusEl.className = cls;
       statusEl.textContent = text;
       console.log(text);
     }
 
-    // ✅ Affiche les erreurs JS directement dans la page
-    window.addEventListener("error", (e) => {
-      setStatus("Erreur JS (window.erro
+    // ✅ erreurs visibles
+    window.addEventListener("error", (e) => setStatus("Erreur JS :\n" + (e?.message || e), "err"));
+    window.addEventListener("unhandledrejection", (e) =>
+      setStatus("Erreur async :\n" + (e?.reason?.message || e?.reason || e), "err")
+    );
+
+    // ✅ test : si tu cliques, ça DOIT s’afficher
+    btnSignup.addEventListener("click", () => setStatus("Clic détecté : bouton signup ✅", "ok"));
+    btnLogin.addEventListener("click", () => setStatus("Clic détecté : bouton login ✅", "ok"));
+
+    // ensuite seulement, on teste Supabase (après avoir validé que le clic marche)
+    if (!window.supabase?.createClient) {
+      setStatus("Supabase n'a pas chargé (script bloqué).", "err");
+    } else {
+      setStatus("Supabase JS chargé ✅ (clics prêts)", "ok");
+    }
+
+    const supabase = window.supabase?.createClient
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+      : null;
+
+    async function realSignUp() {
+      setStatus("Signup…", "muted");
+      const email = emailEl.value.trim();
+      const password = passEl.value;
+      if (!email || !password) return setStatus("Remplis email + mot de passe.", "err");
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: new URL("profile.html", window.location.href).toString() }
+      });
+
+      if (error) return setStatus("Erreur signup : " + error.message, "err");
+      if (data?.session) {
+        setStatus("Compte créé & connecté ✅ Redirection…", "ok");
+        window.location.href = "profile.html";
+      } else {
+        setStatus("Compte créé ✅ Vérifie tes emails (confirmation).", "ok");
+      }
+    }
+
+    async function realSignIn() {
+      setStatus("Login…", "muted");
+      const email = emailEl.value.trim();
+      const password = passEl.value;
+      if (!email || !password) return setStatus("Remplis email + mot de passe.", "err");
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return setStatus("Erreur login : " + error.message, "err");
+
+      setStatus("Connecté ✅ Redirection…", "ok");
+      window.location.href = "profile.html";
+    }
+
+    // 🔁 on remplace les listeners “test” par les vrais
+    btnSignup.addEventListener("click", () => {
+      if (!supabase) return setStatus("Supabase non prêt.", "err");
+      realSignUp();
+    });
+
+    btnLogin.addEventListener("click", () => {
+      if (!supabase) return setStatus("Supabase non prêt.", "err");
+      realSignIn();
+    });
+  </script>
+</body>
+</html>
