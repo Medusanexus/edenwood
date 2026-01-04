@@ -2,125 +2,83 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Edenwood — Connexion</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edenwood — Test clic</title>
 
   <style>
-    body { background-color:#0e1a14; color:#e6f2ea; font-family:Georgia,serif; padding:40px; }
-    h1 { color:#9fe0b5; font-size:2.2rem; margin-bottom:.5rem; }
-    p { margin-bottom:1rem; opacity:.9; }
-    input, button { display:block; margin:10px 0; padding:12px; font-family:inherit; border-radius:8px; border:none; font-size:1rem; }
-    input { width:280px; }
-    button { background:#2a6b52; color:#fff; cursor:pointer; width:220px; }
-    button:hover { background:#348c6a; }
-    #status {
-      margin-top:14px; padding:10px 12px; width:520px; max-width:100%;
-      border-radius:10px; background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.14); white-space:pre-wrap; font-size:.95rem;
+    body {
+      background-color: #0e1a14;
+      color: #e6f2ea;
+      font-family: Georgia, serif;
+      padding: 40px;
     }
-    .ok { color:#5bf2b0; }
-    .err { color:#ff6b6b; }
-    .muted { opacity:.9; }
+
+    h1 { color: #9fe0b5; font-size: 2.2rem; }
+    p { opacity: .9; }
+
+    input, button {
+      display: block;
+      margin: 10px 0;
+      padding: 12px;
+      font-family: inherit;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    input { width: 280px; }
+
+    button {
+      background-color: #2a6b52;
+      color: white;
+      cursor: pointer;
+      width: 220px;
+    }
+
+    button:hover { background-color: #348c6a; }
+
+    #status {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      font-size: 0.95rem;
+    }
   </style>
 </head>
 
 <body>
+
   <h1>Edenwood</h1>
   <p>Entre dans la clairière.</p>
 
-  <p style="opacity:.7; font-size:12px;">VERSION DEBUG: 2026-01-04 A</p>
+  <p style="font-size:12px; opacity:.7;">VERSION TEST CLIC — 2026-01-04 B</p>
 
-  <input id="email" type="email" placeholder="Email" />
-  <input id="password" type="password" placeholder="Mot de passe" />
+  <input type="email" placeholder="Email" />
+  <input type="password" placeholder="Mot de passe" />
 
-  <button id="btnSignup" type="button">Créer un compte</button>
-  <button id="btnLogin" type="button">Se connecter</button>
+  <button id="btnTest" type="button">Créer un compte</button>
 
-  <div id="status" class="muted">Status : en attente…</div>
+  <div id="status">Status : en attente…</div>
 
   <script>
-    const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
-
     const statusEl = document.getElementById("status");
-    const emailEl  = document.getElementById("email");
-    const passEl   = document.getElementById("password");
-    const btnSignup = document.getElementById("btnSignup");
-    const btnLogin  = document.getElementById("btnLogin");
+    const btn = document.getElementById("btnTest");
 
-    function setStatus(text, cls="muted") {
-      statusEl.className = cls;
+    function setStatus(text) {
       statusEl.textContent = text;
       console.log(text);
     }
 
-    // ✅ erreurs visibles
-    window.addEventListener("error", (e) => setStatus("Erreur JS :\n" + (e?.message || e), "err"));
-    window.addEventListener("unhandledrejection", (e) =>
-      setStatus("Erreur async :\n" + (e?.reason?.message || e?.reason || e), "err")
-    );
+    // 🔹 preuve que le JS s’exécute AU CHARGEMENT
+    setStatus("✅ JS chargé (au chargement)");
 
-    // ✅ test : si tu cliques, ça DOIT s’afficher
-    btnSignup.addEventListener("click", () => setStatus("Clic détecté : bouton signup ✅", "ok"));
-    btnLogin.addEventListener("click", () => setStatus("Clic détecté : bouton login ✅", "ok"));
-
-    // ensuite seulement, on teste Supabase (après avoir validé que le clic marche)
-    if (!window.supabase?.createClient) {
-      setStatus("Supabase n'a pas chargé (script bloqué).", "err");
-    } else {
-      setStatus("Supabase JS chargé ✅ (clics prêts)", "ok");
-    }
-
-    const supabase = window.supabase?.createClient
-      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-      : null;
-
-    async function realSignUp() {
-      setStatus("Signup…", "muted");
-      const email = emailEl.value.trim();
-      const password = passEl.value;
-      if (!email || !password) return setStatus("Remplis email + mot de passe.", "err");
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: new URL("profile.html", window.location.href).toString() }
-      });
-
-      if (error) return setStatus("Erreur signup : " + error.message, "err");
-      if (data?.session) {
-        setStatus("Compte créé & connecté ✅ Redirection…", "ok");
-        window.location.href = "profile.html";
-      } else {
-        setStatus("Compte créé ✅ Vérifie tes emails (confirmation).", "ok");
-      }
-    }
-
-    async function realSignIn() {
-      setStatus("Login…", "muted");
-      const email = emailEl.value.trim();
-      const password = passEl.value;
-      if (!email || !password) return setStatus("Remplis email + mot de passe.", "err");
-
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return setStatus("Erreur login : " + error.message, "err");
-
-      setStatus("Connecté ✅ Redirection…", "ok");
-      window.location.href = "profile.html";
-    }
-
-    // 🔁 on remplace les listeners “test” par les vrais
-    btnSignup.addEventListener("click", () => {
-      if (!supabase) return setStatus("Supabase non prêt.", "err");
-      realSignUp();
-    });
-
-    btnLogin.addEventListener("click", () => {
-      if (!supabase) return setStatus("Supabase non prêt.", "err");
-      realSignIn();
+    // 🔹 preuve que le clic est détecté
+    btn.addEventListener("click", () => {
+      setStatus("✅ CLIC détecté (bouton fonctionnel)");
     });
   </script>
+
 </body>
 </html>
