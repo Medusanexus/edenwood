@@ -36,3 +36,25 @@
   opacity: 1;
   text-decoration: underline;
 }
+
+/* ===== NAVIGATION EDENWOOD ===== */
+.nav{
+  margin-top:18px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,0.12);
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  font-size:0.95rem;
+  opacity:0.85;
+}
+
+.nav a{
+  color:rgba(230,242,234,0.9);
+  text-decoration:none;
+}
+
+.nav a:hover{
+  text-decoration: underline;
+  opacity: 1;
+}
