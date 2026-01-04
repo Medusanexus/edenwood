@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Edenwood — Connexion</title>
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <!-- Police fantasy (titre uniquement) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,43 +27,42 @@
         <button id="btnSignup" type="button">Créer un compte</button>
         <button id="btnLogin" type="button">Se connecter</button>
 
-        <div id="status"></div>
+        <div id="status">Chargement…</div>
 
         <a class="btn secondary" href="index.html">Retour</a>
       </div>
     </div>
   </div>
 
-  <script>
-    // ⚠️ Tes clés Supabase (les mêmes que tu avais)
+  <script type="module">
+    // ✅ Import Supabase (ESM) — plus fiable que window.supabase
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    // ⚠️ Tes clés
     const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
     const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
 
-    const emailEl  = document.getElementById("email");
-    const passEl   = document.getElementById("password");
-    const statusEl = document.getElementById("status");
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const emailEl   = document.getElementById("email");
+    const passEl    = document.getElementById("password");
+    const statusEl  = document.getElementById("status");
     const btnSignup = document.getElementById("btnSignup");
     const btnLogin  = document.getElementById("btnLogin");
 
     function setStatus(text, isError = false) {
       statusEl.textContent = text;
       statusEl.className = isError ? "error" : "";
-      console[isError ? "error" : "log"](text);
     }
 
-    function setLoading(isLoading) {
-      btnSignup.disabled = isLoading;
-      btnLogin.disabled = isLoading;
-      btnSignup.textContent = isLoading ? "..." : "Créer un compte";
-      btnLogin.textContent  = isLoading ? "..." : "Se connecter";
+    function setLoading(on) {
+      btnSignup.disabled = on;
+      btnLogin.disabled = on;
+      btnSignup.textContent = on ? "..." : "Créer un compte";
+      btnLogin.textContent  = on ? "..." : "Se connecter";
     }
 
-    // Garde-fou : Supabase chargé ?
-    if (!window.supabase || !window.supabase.createClient) {
-      setStatus("Erreur : Supabase ne s’est pas chargé. (Vérifie ta connexion / bloqueur de scripts)", true);
-    }
-
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    setStatus("JS OK ✅ (Supabase chargé)");
 
     async function handleSignup() {
       const email = emailEl.value.trim();
@@ -80,6 +76,7 @@
 
       try {
         const redirectUrl = new URL("profile.html", window.location.href).toString();
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -88,12 +85,11 @@
 
         if (error) return setStatus("Signup error: " + error.message, true);
 
-        // Selon ta config Supabase, il peut demander une confirmation email
         if (data?.session) {
           setStatus("Compte créé + connecté. Redirection…");
           window.location.href = "profile.html";
         } else {
-          setStatus("Compte créé. Si Supabase demande une confirmation, vérifie tes emails puis reconnecte-toi.");
+          setStatus("Compte créé. Vérifie tes emails si confirmation demandée, puis reconnecte-toi.");
         }
       } catch (e) {
         setStatus("Exception signup: " + (e?.message || e), true);
@@ -124,7 +120,6 @@
       }
     }
 
-    // Clicks
     btnSignup.addEventListener("click", handleSignup);
     btnLogin.addEventListener("click", handleLogin);
 
@@ -134,18 +129,12 @@
     });
 
     // Si déjà connecté : redirection
-    (async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        if (data?.session) {
-          setStatus("Session détectée. Redirection…");
-          window.location.href = "profile.html";
-        }
-      } catch (e) {
-        // on ne bloque pas la page si ça rate
-        console.warn(e);
-      }
-    })();
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session) window.location.href = "profile.html";
+    } catch {
+      // pas bloquant
+    }
   </script>
 </body>
 </html>
