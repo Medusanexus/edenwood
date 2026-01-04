@@ -76,20 +76,40 @@
       statusEl.className = isError ? "error" : "";
     }
 
-    // Garde-fou : pas connecté => login
-    const { data } = await supabase.auth.getSession();
-    const session = data?.session;
-    if (!session) window.location.href = "login.html";
+    // ✅ IMPORTANT : après un email change confirmé, on rafraîchit la session
+    // pour récupérer l'email à jour.
+    async function refreshAndGetUser() {
+      // 1) récupérer session courante
+      const { data: s1 } = await supabase.auth.getSession();
+      if (!s1?.session) return null;
 
-    const user = session.user;
-    const pseudo = user.user_metadata?.display_name || "—";
-    const email = user.email || "—";
+      // 2) forcer un refresh (si possible)
+      //    (Supabase v2 fournit refreshSession; si déjà à jour, ça ne casse rien)
+      try {
+        await supabase.auth.refreshSession();
+      } catch (_) {
+        // pas grave si le refresh n'est pas nécessaire
+      }
 
-    document.getElementById("profilePseudo").textContent = pseudo;
-    document.getElementById("profileEmail").textContent = email;
+      // 3) relire l'utilisateur frais
+      const { data: u } = await supabase.auth.getUser();
+      return u?.user ?? null;
+    }
 
-    // Pré-remplir pseudo (pratique)
-    document.getElementById("editPseudo").value = (pseudo === "—" ? "" : pseudo);
+    const user = await refreshAndGetUser();
+    if (!user) window.location.href = "login.html";
+
+    function renderUser(u) {
+      const pseudo = u.user_metadata?.display_name || "—";
+      const email = u.email || "—";
+
+      document.getElementById("profilePseudo").textContent = pseudo;
+      document.getElementById("profileEmail").textContent = email;
+
+      document.getElementById("editPseudo").value = (pseudo === "—" ? "" : pseudo);
+    }
+
+    renderUser(user);
 
     // --- Update pseudo ---
     document.getElementById("btnSavePseudo").addEventListener("click", async () => {
@@ -103,7 +123,10 @@
 
       if (error) return setStatus(error.message, true);
 
-      document.getElementById("profilePseudo").textContent = newPseudo;
+      // re-render from fresh user
+      const { data } = await supabase.auth.getUser();
+      renderUser(data.user);
+
       setStatus("Pseudo mis à jour ✅");
     });
 
@@ -117,8 +140,7 @@
 
       if (error) return setStatus(error.message, true);
 
-      // Selon config Supabase, un mail de confirmation peut être requis
-      setStatus("Email : demande envoyée ✅ Vérifie ta boîte mail (et les spams) pour confirmer si nécessaire.");
+      setStatus("Demande envoyée ✅ Vérifie ta boîte mail (et les spams) pour confirmer.");
       document.getElementById("editEmail").value = "";
     });
 
@@ -149,7 +171,6 @@
     });
   </script>
 
-  <!-- Nav intelligente (connecté / pas connecté + logout lien) -->
   <script type="module" src="assets/nav.js"></script>
 </body>
 </html>
