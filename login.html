@@ -8,51 +8,94 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+    :root {
+      --bg: #0e1a14;
+      --accent: #9fe0b5;
+      --btn: #2a6b52;
+      --btnHover: #348c6a;
+      --text: #e6f2ea;
+    }
+
     body {
-      background-color: #0e1a14;
-      color: #e6f2ea;
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
       font-family: Georgia, serif;
+
+      background-color: var(--bg);
+      background-image: url("assets/edenwood-bg.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    /* voile doux pour la lisibilité */
+    .overlay {
+      min-height: 100vh;
       padding: 40px;
+      background: linear-gradient(
+        to bottom,
+        rgba(14, 26, 20, 0.35),
+        rgba(14, 26, 20, 0.70)
+      );
     }
 
     h1 {
-      color: #9fe0b5;
-      font-size: 2.2rem;
-      margin-bottom: .5rem;
+      color: var(--accent);
+      font-size: 2.6rem;
+      margin: 0 0 10px 0;
+      letter-spacing: 0.5px;
     }
 
-    p { opacity: .9; margin-bottom: 1rem; }
+    p {
+      margin: 0 0 18px 0;
+      opacity: 0.92;
+    }
+
+    .panel {
+      display: inline-block;
+      padding: 18px 18px 14px;
+      border-radius: 14px;
+      background: rgba(14, 26, 20, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(2px);
+    }
 
     input, button {
       display: block;
       margin: 10px 0;
       padding: 12px;
-      font-family: inherit;
-      border-radius: 8px;
       border: none;
+      border-radius: 10px;
+      font-family: inherit;
       font-size: 1rem;
     }
 
-    input { width: 280px; }
-
-    button {
-      background-color: #2a6b52;
-      color: white;
-      cursor: pointer;
-      width: 220px;
+    input {
+      width: 300px;
+      max-width: 80vw;
+      background: rgba(255,255,255,0.92);
+      color: #0b1411;
+      outline: none;
     }
 
-    button:hover { background-color: #348c6a; }
+    button {
+      width: 220px;
+      max-width: 80vw;
+      background-color: var(--btn);
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover { background-color: var(--btnHover); }
 
     #status {
-      margin-top: 16px;
-      padding: 12px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.14);
-      font-size: 0.95rem;
+      margin-top: 12px;
+      max-width: 320px;
       white-space: pre-wrap;
-      opacity: .9;
+      opacity: 0.92;
+      font-size: 0.95rem;
     }
 
     .error { color: #ff6b6b; }
@@ -60,78 +103,80 @@
 </head>
 
 <body>
+  <div class="overlay">
+    <h1>Edenwood</h1>
+    <p>Entre dans la clairière.</p>
 
-  <h1>Edenwood</h1>
-  <p>Entre dans la clairière.</p>
+    <div class="panel">
+      <input id="email" type="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="Mot de passe" />
 
-  <input id="email" type="email" placeholder="Email" />
-  <input id="password" type="password" placeholder="Mot de passe" />
+      <button id="btnSignup" type="button">Créer un compte</button>
+      <button id="btnLogin" type="button">Se connecter</button>
 
-  <button id="btnSignup" type="button">Créer un compte</button>
-  <button id="btnLogin" type="button">Se connecter</button>
+      <div id="status"></div>
+    </div>
 
-  <div id="status"></div>
+    <script>
+      const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
+      const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
 
-  <script>
-    const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      const emailEl = document.getElementById("email");
+      const passEl  = document.getElementById("password");
+      const statusEl = document.getElementById("status");
 
-    const emailEl = document.getElementById("email");
-    const passEl  = document.getElementById("password");
-    const statusEl = document.getElementById("status");
+      function setStatus(text, isError = false) {
+        statusEl.textContent = text;
+        statusEl.className = isError ? "error" : "";
+      }
 
-    function setStatus(text, isError = false) {
-      statusEl.textContent = text;
-      statusEl.className = isError ? "error" : "";
-    }
+      document.getElementById("btnSignup").addEventListener("click", async () => {
+        const email = emailEl.value.trim();
+        const password = passEl.value;
 
-    document.getElementById("btnSignup").addEventListener("click", async () => {
-      const email = emailEl.value.trim();
-      const password = passEl.value;
+        if (!email || !password)
+          return setStatus("Merci de remplir email et mot de passe.", true);
 
-      if (!email || !password)
-        return setStatus("Merci de remplir email et mot de passe.", true);
+        if (password.length < 6)
+          return setStatus("Le mot de passe doit contenir au moins 6 caractères.", true);
 
-      if (password.length < 6)
-        return setStatus("Le mot de passe doit contenir au moins 6 caractères.", true);
+        const { error, data } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: new URL("profile.html", window.location.href).toString()
+          }
+        });
 
-      const { error, data } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: new URL("profile.html", window.location.href).toString()
+        if (error) return setStatus(error.message, true);
+
+        if (data.session) {
+          window.location.href = "profile.html";
+        } else {
+          setStatus("Compte créé. Vérifie tes emails pour confirmer.");
         }
       });
 
-      if (error) return setStatus(error.message, true);
+      document.getElementById("btnLogin").addEventListener("click", async () => {
+        const email = emailEl.value.trim();
+        const password = passEl.value;
 
-      if (data.session) {
+        if (!email || !password)
+          return setStatus("Merci de remplir email et mot de passe.", true);
+
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) return setStatus(error.message, true);
+
         window.location.href = "profile.html";
-      } else {
-        setStatus("Compte créé. Vérifie tes emails pour confirmer.");
-      }
-    });
+      });
 
-    document.getElementById("btnLogin").addEventListener("click", async () => {
-      const email = emailEl.value.trim();
-      const password = passEl.value;
-
-      if (!email || !password)
-        return setStatus("Merci de remplir email et mot de passe.", true);
-
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return setStatus(error.message, true);
-
-      window.location.href = "profile.html";
-    });
-
-    (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) window.location.href = "profile.html";
-    })();
-  </script>
-
+      (async () => {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) window.location.href = "profile.html";
+      })();
+    </script>
+  </div>
 </body>
 </html>
