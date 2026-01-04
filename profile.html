@@ -23,11 +23,33 @@
         <div class="info"><strong>Pseudo :</strong> <span id="profilePseudo">…</span></div>
         <div class="info"><strong>Email :</strong> <span id="profileEmail">…</span></div>
 
-        <!-- Lore (placeholder pour l’instant) -->
+        <!-- Lore (placeholder) -->
         <div class="info"><strong>Rang :</strong> Éveillé</div>
         <div class="info"><strong>Affinité :</strong> Forêt ancienne</div>
         <div class="info"><strong>Carte liée :</strong> À venir…</div>
 
+        <!-- ===== PARAMÈTRES ===== -->
+        <div class="info" style="text-align:center;">
+          <strong>Paramètres</strong><br>
+          <span style="opacity:.85; font-size:.95rem;">Modifier ton pseudo, ton email ou ton mot de passe</span>
+        </div>
+
+        <!-- PSEUDO -->
+        <input id="editPseudo" type="text" placeholder="Nouveau pseudo" autocomplete="nickname" />
+        <button id="btnSavePseudo" type="button">Enregistrer le pseudo</button>
+
+        <!-- EMAIL -->
+        <input id="editEmail" type="email" placeholder="Nouvel email" autocomplete="email" />
+        <button id="btnSaveEmail" type="button">Changer l’email</button>
+
+        <!-- MOT DE PASSE -->
+        <input id="editPassword" type="password" placeholder="Nouveau mot de passe (6+)" autocomplete="new-password" />
+        <input id="editPassword2" type="password" placeholder="Confirmer le mot de passe" autocomplete="new-password" />
+        <button id="btnSavePassword" type="button">Changer le mot de passe</button>
+
+        <div id="status"></div>
+
+        <!-- Actions -->
         <a class="btn" href="index.html">Retour à l’accueil</a>
         <a class="btn secondary" href="#" id="btnLogout">Changer de voyageur</a>
 
@@ -48,17 +70,76 @@
     const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    const statusEl = document.getElementById("status");
+    function setStatus(text, isError=false){
+      statusEl.textContent = text;
+      statusEl.className = isError ? "error" : "";
+    }
+
     // Garde-fou : pas connecté => login
     const { data } = await supabase.auth.getSession();
     const session = data?.session;
     if (!session) window.location.href = "login.html";
 
     const user = session.user;
-    const pseudo = (user.user_metadata && user.user_metadata.display_name) ? user.user_metadata.display_name : "—";
-    const email = user.email ?? "—";
+    const pseudo = user.user_metadata?.display_name || "—";
+    const email = user.email || "—";
 
     document.getElementById("profilePseudo").textContent = pseudo;
     document.getElementById("profileEmail").textContent = email;
+
+    // Pré-remplir pseudo (pratique)
+    document.getElementById("editPseudo").value = (pseudo === "—" ? "" : pseudo);
+
+    // --- Update pseudo ---
+    document.getElementById("btnSavePseudo").addEventListener("click", async () => {
+      const newPseudo = document.getElementById("editPseudo").value.trim();
+      if (!newPseudo) return setStatus("Choisis un pseudo.", true);
+
+      setStatus("Mise à jour du pseudo…");
+      const { error } = await supabase.auth.updateUser({
+        data: { display_name: newPseudo }
+      });
+
+      if (error) return setStatus(error.message, true);
+
+      document.getElementById("profilePseudo").textContent = newPseudo;
+      setStatus("Pseudo mis à jour ✅");
+    });
+
+    // --- Update email ---
+    document.getElementById("btnSaveEmail").addEventListener("click", async () => {
+      const newEmail = document.getElementById("editEmail").value.trim();
+      if (!newEmail) return setStatus("Entre un nouvel email.", true);
+
+      setStatus("Demande de changement d’email…");
+      const { error } = await supabase.auth.updateUser({ email: newEmail });
+
+      if (error) return setStatus(error.message, true);
+
+      // Selon config Supabase, un mail de confirmation peut être requis
+      setStatus("Email : demande envoyée ✅ Vérifie ta boîte mail (et les spams) pour confirmer si nécessaire.");
+      document.getElementById("editEmail").value = "";
+    });
+
+    // --- Update password ---
+    document.getElementById("btnSavePassword").addEventListener("click", async () => {
+      const p1 = document.getElementById("editPassword").value;
+      const p2 = document.getElementById("editPassword2").value;
+
+      if (!p1 || !p2) return setStatus("Entre et confirme ton mot de passe.", true);
+      if (p1.length < 6) return setStatus("Mot de passe : 6 caractères minimum.", true);
+      if (p1 !== p2) return setStatus("Les mots de passe ne correspondent pas.", true);
+
+      setStatus("Mise à jour du mot de passe…");
+      const { error } = await supabase.auth.updateUser({ password: p1 });
+
+      if (error) return setStatus(error.message, true);
+
+      document.getElementById("editPassword").value = "";
+      document.getElementById("editPassword2").value = "";
+      setStatus("Mot de passe mis à jour ✅");
+    });
 
     // Déconnexion via bouton principal (Changer de voyageur)
     document.getElementById("btnLogout").addEventListener("click", async (e) => {
@@ -68,7 +149,7 @@
     });
   </script>
 
-  <!-- Nav intelligente (connecté / pas connecté + logout) -->
+  <!-- Nav intelligente (connecté / pas connecté + logout lien) -->
   <script type="module" src="assets/nav.js"></script>
 </body>
 </html>
