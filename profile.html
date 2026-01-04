@@ -5,86 +5,69 @@
   <title>Edenwood — Profil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- CSS principal -->
+  <!-- ⚠️ Garde EXACTEMENT le même lien que sur login.html -->
   <link rel="stylesheet" href="assets/style.css">
 </head>
 
 <body>
 
-  <main class="container">
+  <div class="overlay">
+    <div class="wrap">
 
-    <h1 class="title">EDENWOOD</h1>
-    <p class="subtitle">Bienvenue, voyageur·se.</p>
+      <h1>EDENWOOD</h1>
+      <p class="subtitle">Bienvenue, voyageur·se.</p>
 
-    <section class="profile-card">
+      <div class="panel">
 
-      <div class="profile-row">
-        <strong>Pseudo :</strong> —
+        <!-- INFOS PROFIL -->
+        <div class="info"><strong>Pseudo :</strong> —</div>
+        <div class="info"><strong>Email :</strong> medusa.nexus@gmail.com</div>
+        <div class="info"><strong>Rang :</strong> Éveillé</div>
+        <div class="info"><strong>Affinité :</strong> Forêt ancienne</div>
+        <div class="info"><strong>Carte liée :</strong> À venir…</div>
+
+        <!-- 🔐 CHANGEMENT EMAIL -->
+        <div class="info warning">
+          <p class="info-title">🔐 Changement d’email en cours</p>
+          <p class="info-text">
+            Pour des raisons de sécurité, la modification de ton email doit être confirmée
+            <strong>depuis ton ancien email ET ton nouvel email</strong>.
+          </p>
+          <p class="info-text">
+            Une fois les deux confirmations effectuées, reconnecte-toi avec ton nouvel email.
+          </p>
+        </div>
+
+        <!-- PARAMETRES -->
+        <div class="info" style="text-align:center;">
+          <strong>Paramètres</strong><br>
+          Modifier ton pseudo, ton email ou ton mot de passe
+        </div>
+
+        <input type="text" placeholder="Nouveau pseudo">
+        <button>Enregistrer le pseudo</button>
+
+        <input type="email" value="medusa.rpg@gmail.com">
+        <button>Changer l’email</button>
+
+        <input type="password" placeholder="Nouveau mot de passe">
+        <input type="password" placeholder="Confirmer le mot de passe">
+        <button>Changer le mot de passe</button>
+
+        <div id="status"></div>
+
+        <a class="btn secondary" href="index.html">Retour à l’accueil</a>
+        <button>Changer de voyageur</button>
+
+        <div class="nav">
+          <a href="index.html">Accueil</a>
+          <a href="profile.html">Profil</a>
+          <a href="login.html">Connexion</a>
+        </div>
+
       </div>
-
-      <div class="profile-row">
-        <strong>Email :</strong> medusa.nexus@gmail.com
-      </div>
-
-      <div class="profile-row">
-        <strong>Rang :</strong> Éveillé
-      </div>
-
-      <div class="profile-row">
-        <strong>Affinité :</strong> Forêt ancienne
-      </div>
-
-      <div class="profile-row">
-        <strong>Carte liée :</strong> À venir…
-      </div>
-
-      <!-- 🔐 BLOC CHANGEMENT EMAIL (LE FAMEUX) -->
-      <div class="info-box warning">
-        <p class="info-title">🔐 Changement d’email en cours</p>
-        <p class="info-text">
-          Pour des raisons de sécurité, la modification de ton email doit être confirmée
-          <strong>depuis ton ancien email ET ton nouvel email</strong>.
-        </p>
-        <p class="info-text">
-          Une fois les deux confirmations effectuées, reconnecte-toi avec ton nouvel email.
-        </p>
-      </div>
-
-    </section>
-
-    <section class="settings-card">
-
-      <h2 class="section-title">Paramètres</h2>
-      <p class="section-subtitle">
-        Modifier ton pseudo, ton email ou ton mot de passe
-      </p>
-
-      <!-- Modifier pseudo -->
-      <input type="text" placeholder="Nouveau pseudo">
-      <button class="btn-primary">Enregistrer le pseudo</button>
-
-      <!-- Modifier email -->
-      <input type="email" value="medusa.rpg@gmail.com">
-      <button class="btn-primary">Changer l’email</button>
-
-      <!-- Modifier mot de passe -->
-      <input type="password" placeholder="Nouveau mot de passe">
-      <input type="password" placeholder="Confirmer le mot de passe">
-      <button class="btn-primary">Changer le mot de passe</button>
-
-    </section>
-
-    <div class="actions">
-      <button class="btn-secondary" onclick="location.href='index.html'">
-        Retour à l’accueil
-      </button>
-
-      <button class="btn-danger">
-        Changer de voyageur
-      </button>
     </div>
-
-  </main>
+  </div>
 
 </body>
 </html>
