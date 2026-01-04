@@ -25,28 +25,33 @@
     </div>
   </div>
 
-  <script>
-    // Objectif : récupérer confirmation_url envoyé par Supabase,
-    // puis FORCER redirect_to vers /edenwood/profile.html (ou login.html si tu préfères).
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
     const statusEl = document.getElementById("status");
     const params = new URLSearchParams(window.location.search);
-    const raw = params.get("confirmation_url");
 
-    if (!raw) {
-      statusEl.textContent = "Lien invalide : confirmation_url manquant.";
+    const type = params.get("type");
+    const token_hash = params.get("token_hash");
+
+    if (!type || !token_hash) {
+      statusEl.textContent = "Lien invalide : informations manquantes.";
       statusEl.className = "error";
     } else {
-      try {
-        const u = new URL(raw);
+      statusEl.textContent = "Confirmation Supabase…";
 
-        // ✅ Forcer la redirection finale vers ton vrai site
-        u.searchParams.set("redirect_to", "https://medusanexus.github.io/edenwood/profile.html");
+      const { error } = await supabase.auth.verifyOtp({ type, token_hash });
 
-        // Redirection vers l'URL de confirmation Supabase (avec redirect_to corrigé)
-        window.location.href = u.toString();
-      } catch (e) {
-        statusEl.textContent = "Lien invalide : impossible de lire l’URL.";
+      if (error) {
+        statusEl.textContent = "Erreur : " + error.message;
         statusEl.className = "error";
+      } else {
+        statusEl.textContent = "Confirmé ✅ Redirection…";
+        window.location.href = "profile.html";
       }
     }
   </script>
