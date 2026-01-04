@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/style.css" />
 </head>
 
 <body>
@@ -19,16 +19,14 @@
       <p class="subtitle">Entre dans la clairière.</p>
 
       <div class="panel">
-        <!-- CTA principal (intelligent) -->
-        <a class="btn" href="login.html" data-auth="out">Connexion</a>
-        <a class="btn secondary" href="profile.html" data-auth="in">Voir le profil</a>
+        <a class="btn" data-auth="out" href="login.html">Connexion</a>
+        <a class="btn secondary" data-auth="in" href="profile.html">Voir le profil</a>
 
-        <!-- NAV (intelligente) -->
-        <nav class="nav">
+        <nav>
           <a href="index.html">Accueil</a>
-          <a href="profile.html" data-auth="in">Profil</a>
-          <a href="login.html" data-auth="out">Connexion</a>
-          <a href="#" id="btnLogout" data-auth="in">Déconnexion</a>
+          <a data-auth="in" href="profile.html">Profil</a>
+          <a data-auth="out" href="login.html">Connexion</a>
+          <a data-auth="in" id="linkLogout" href="#">Déconnexion</a>
         </nav>
       </div>
     </div>
