@@ -19,6 +19,9 @@
       <p class="subtitle">Entre dans la clairière.</p>
 
       <div class="panel">
+        <!-- PSEUDO (utile à l'inscription, optionnel pour login) -->
+        <input id="pseudo" type="text" placeholder="Pseudo (pour l’inscription)" autocomplete="nickname" />
+
         <input id="email" type="email" placeholder="Email" autocomplete="email" />
         <input id="password" type="password" placeholder="Mot de passe (6+)" autocomplete="current-password" />
 
@@ -31,7 +34,7 @@
           <a href="index.html">Accueil</a>
           <a href="profile.html" data-auth="in">Profil</a>
           <a href="login.html" data-auth="out">Connexion</a>
-          <a href="#" id="btnLogout" data-auth="in">Déconnexion</a>
+          <a href="#" id="linkLogout" data-auth="in">Déconnexion</a>
         </nav>
       </div>
     </div>
@@ -44,6 +47,7 @@
     const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    const pseudoEl = document.getElementById("pseudo");
     const emailEl  = document.getElementById("email");
     const passEl   = document.getElementById("password");
     const statusEl = document.getElementById("status");
@@ -53,24 +57,32 @@
       statusEl.className = isError ? "error" : "";
     }
 
-    // Déjà connecté ? -> profil
-    const { data } = await supabase.auth.getSession();
-    if (data?.session) window.location.href = "profile.html";
+    // Si déjà connecté -> profil
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData?.session) window.location.href = "profile.html";
 
     document.getElementById("btnSignup").addEventListener("click", async () => {
+      const pseudo = pseudoEl.value.trim();
       const email = emailEl.value.trim();
       const password = passEl.value;
 
+      if (!pseudo) return setStatus("Choisis un pseudo pour l’inscription.", true);
       if (!email || !password) return setStatus("Merci de remplir email et mot de passe.", true);
       if (password.length < 6) return setStatus("Mot de passe : 6 caractères minimum.", true);
 
       setStatus("Création du compte…");
 
       const redirectUrl = new URL("profile.html", window.location.href).toString();
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: redirectUrl }
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            display_name: pseudo
+          }
+        }
       });
 
       if (error) return setStatus(error.message, true);
@@ -101,6 +113,7 @@
     });
   </script>
 
+  <!-- Nav intelligente (connecté / pas connecté + logout) -->
   <script type="module" src="assets/nav.js"></script>
 </body>
 </html>
