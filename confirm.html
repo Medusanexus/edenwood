@@ -4,8 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Edenwood — Confirmation</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="assets/style.css">
 </head>
+
 <body>
   <div class="overlay">
     <div class="wrap">
@@ -38,20 +44,35 @@
     const type = params.get("type");
     const token_hash = params.get("token_hash");
 
-    if (!type || !token_hash) {
-      statusEl.textContent = "Lien invalide : informations manquantes.";
+    function fail(msg){
+      statusEl.textContent = msg;
       statusEl.className = "error";
+    }
+
+    if (!type || !token_hash) {
+      fail("Lien invalide : informations manquantes.");
     } else {
       statusEl.textContent = "Confirmation Supabase…";
 
       const { error } = await supabase.auth.verifyOtp({ type, token_hash });
 
       if (error) {
-        statusEl.textContent = "Erreur : " + error.message;
-        statusEl.className = "error";
+        fail("Erreur : " + error.message);
       } else {
-        statusEl.textContent = "Confirmé ✅ Redirection…";
-        window.location.href = "profile.html";
+        // ✅ IMPORTANT : pour un changement d'email, la session peut rester "ancienne".
+        // Solution fiable : déconnexion puis reconnexion.
+        statusEl.textContent = "Confirmé ✅ Retour à la connexion…";
+        await supabase.auth.signOut();
+
+        // Message de retour pour le login
+        const msg =
+          (type === "email_change") ? "Email mis à jour. Reconnecte-toi." :
+          (type === "recovery")    ? "Tu peux maintenant définir un nouveau mot de passe." :
+          (type === "signup")      ? "Compte confirmé. Tu peux te connecter." :
+                                     "Confirmation effectuée. Tu peux te connecter.";
+
+        const url = "login.html?message=" + encodeURIComponent(msg);
+        window.location.href = url;
       }
     }
   </script>
