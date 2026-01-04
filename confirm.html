@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Edenwood — Confirmation</title>
+  <title>Edenwood — Validation</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/style.css" />
 </head>
 
 <body>
@@ -41,38 +41,23 @@
     const statusEl = document.getElementById("status");
     const params = new URLSearchParams(window.location.search);
 
-    const type = params.get("type");
+    const type = params.get("type");         // "signup" ou "email_change" etc
     const token_hash = params.get("token_hash");
 
-    function fail(msg){
-      statusEl.textContent = msg;
-      statusEl.className = "error";
-    }
-
     if (!type || !token_hash) {
-      fail("Lien invalide : informations manquantes.");
+      statusEl.textContent = "Lien invalide : informations manquantes.";
+      statusEl.className = "error";
     } else {
       statusEl.textContent = "Confirmation Supabase…";
 
       const { error } = await supabase.auth.verifyOtp({ type, token_hash });
 
       if (error) {
-        fail("Erreur : " + error.message);
+        statusEl.textContent = "Erreur : " + error.message;
+        statusEl.className = "error";
       } else {
-        // ✅ IMPORTANT : pour un changement d'email, la session peut rester "ancienne".
-        // Solution fiable : déconnexion puis reconnexion.
-        statusEl.textContent = "Confirmé ✅ Retour à la connexion…";
-        await supabase.auth.signOut();
-
-        // Message de retour pour le login
-        const msg =
-          (type === "email_change") ? "Email mis à jour. Reconnecte-toi." :
-          (type === "recovery")    ? "Tu peux maintenant définir un nouveau mot de passe." :
-          (type === "signup")      ? "Compte confirmé. Tu peux te connecter." :
-                                     "Confirmation effectuée. Tu peux te connecter.";
-
-        const url = "login.html?message=" + encodeURIComponent(msg);
-        window.location.href = url;
+        statusEl.textContent = "Confirmé ✅ Redirection…";
+        setTimeout(() => (window.location.href = "profile.html"), 700);
       }
     }
   </script>
