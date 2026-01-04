@@ -5,12 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Edenwood — Profil</title>
 
-  <!-- Police (titre) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
 
-  <!-- CSS centralisé (IMPORTANT) -->
   <link rel="stylesheet" href="assets/style.css">
 </head>
 
@@ -30,14 +28,14 @@
 
         <nav class="nav">
           <a href="index.html">Accueil</a>
-          <a href="profile.html">Profil</a>
-          <a href="login.html">Connexion</a>
+          <a href="profile.html" data-auth="in">Profil</a>
+          <a href="login.html" data-auth="out">Connexion</a>
+          <a href="#" id="btnLogout" data-auth="in">Déconnexion</a>
         </nav>
       </div>
     </div>
   </div>
 
-  <!-- Supabase (ESM) -->
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
@@ -45,16 +43,18 @@
     const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Si pas connecté -> login
+    // Garde-fou : pas connecté => login
     const { data } = await supabase.auth.getSession();
     if (!data?.session) window.location.href = "login.html";
 
-    // Déconnexion
+    // Déconnexion (bouton principal)
     document.getElementById("btnLogout").addEventListener("click", async (e) => {
       e.preventDefault();
       await supabase.auth.signOut();
       window.location.href = "login.html";
     });
   </script>
+
+  <script type="module" src="assets/nav.js"></script>
 </body>
 </html>
