@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Edenwood — Connexion</title>
 
+  <!-- Supabase v2 (CDN simple) -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
@@ -13,62 +14,152 @@
       font-family: Georgia, serif;
       padding: 40px;
     }
-    h1 { color: #9fe0b5; }
+
+    h1 {
+      color: #9fe0b5;
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      margin-bottom: 1.5rem;
+      opacity: 0.9;
+    }
+
     input, button {
       display: block;
       margin: 10px 0;
-      padding: 8px;
+      padding: 10px;
       font-family: inherit;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    input {
+      width: 260px;
+    }
+
+    button {
+      background-color: #2a6b52;
+      color: white;
+      cursor: pointer;
+      width: 180px;
+    }
+
+    button:hover {
+      background-color: #348c6a;
     }
   </style>
 </head>
 
 <body>
+
   <h1>Edenwood</h1>
   <p>Entre dans la clairière.</p>
 
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Mot de passe">
+  <input id="email" type="email" placeholder="Email" />
+  <input id="password" type="password" placeholder="Mot de passe" />
 
   <button onclick="signUp()">Créer un compte</button>
   <button onclick="signIn()">Se connecter</button>
 
-  <p id="message"></p>
-
   <script>
+    /*********************************************************
+     * 🔑 SUPABASE — TES VRAIES CLÉS
+     *********************************************************/
     const SUPABASE_URL = "https://skwjxawyznwmmlvfepfn.supabase.co";
     const SUPABASE_KEY = "sb_publishable_8t8bVf4UHqKa4yNBdcJ9Og_VrZnpDKy";
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    /*********************************************************
+     * INIT SUPABASE
+     *********************************************************/
+    const supabase = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
 
-    async function signUp() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+    const emailEl = document.getElementById("email");
+    const passEl  = document.getElementById("password");
 
-      const { error } = await supabase.auth.signUp({
-        email,
-        password
-      });
-
-      document.getElementById("message").textContent =
-        error ? error.message : "Compte créé 🌱 Vérifie ton email.";
+    function msg(text) {
+      console.log(text);
+      alert(text); // volontairement simple pour debug
     }
 
-    async function signIn() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+    /*********************************************************
+     * SIGN UP
+     *********************************************************/
+    window.signUp = async function () {
+      const email = emailEl.value.trim();
+      const password = passEl.value;
 
-      const { error } = await supabase.auth.signInWithPassword({
+      if (!email || !password) {
+        msg("Remplis l’email et le mot de passe.");
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          emailRedirectTo: new URL(
+            "profile.html",
+            window.location.href
+          ).toString(),
+        }
       });
 
       if (error) {
-        document.getElementById("message").textContent = error.message;
+        msg("Erreur création : " + error.message);
+        return;
+      }
+
+      if (data.session) {
+        msg("Compte créé et connecté ✅");
+        window.location.href = "profile.html";
       } else {
+        msg("Compte créé ✅ Vérifie tes emails pour confirmer.");
+      }
+    };
+
+    /*********************************************************
+     * SIGN IN
+     *********************************************************/
+    window.signIn = async function () {
+      const email = emailEl.value.trim();
+      const password = passEl.value;
+
+      if (!email || !password) {
+        msg("Remplis l’email et le mot de passe.");
+        return;
+      }
+
+      const { data, error } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+      if (error) {
+        msg("Erreur connexion : " + error.message);
+        return;
+      }
+
+      msg("Connexion réussie ✅");
+      window.location.href = "profile.html";
+    };
+
+    /*********************************************************
+     * AUTO-REDIRECTION SI DÉJÀ CONNECTÉ
+     *********************************************************/
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session) {
         window.location.href = "profile.html";
       }
-    }
+    })();
   </script>
+
 </body>
 </html>
